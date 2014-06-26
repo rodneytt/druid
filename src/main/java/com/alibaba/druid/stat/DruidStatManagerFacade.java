@@ -50,11 +50,11 @@ import com.alibaba.druid.util.Utils;
  */
 public final class DruidStatManagerFacade {
 
-    private final static DruidStatManagerFacade instance    = new DruidStatManagerFacade();
-    private boolean                             resetEnable = true;
-    private final AtomicLong                    resetCount  = new AtomicLong();
+    private final static DruidStatManagerFacade instance = new DruidStatManagerFacade();
+    private boolean resetEnable = true;
+    private final AtomicLong resetCount = new AtomicLong();
 
-    private DruidStatManagerFacade(){
+    private DruidStatManagerFacade() {
     }
 
     public static DruidStatManagerFacade getInstance() {
@@ -171,7 +171,6 @@ public final class DruidStatManagerFacade {
                 Map<String, Object> wallStat = DruidDataSourceUtils.getWallStatMap(datasource);
                 map = mergWallStat(map, wallStat);
             }
-
             return map;
         }
 
@@ -184,10 +183,9 @@ public final class DruidStatManagerFacade {
         }
 
         return new HashMap<String, Object>();
-        //
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static Map mergWallStat(Map mapA, Map mapB) {
         if (mapA == null || mapA.size() == 0) {
             return mapB;
@@ -247,6 +245,13 @@ public final class DruidStatManagerFacade {
                     newMap.put(key, mergedList);
                 } else if (valueA instanceof String && valueB instanceof String) {
                     newMap.put(key, valueA);
+                } else if (valueA.getClass().isArray() && valueB.getClass().isArray()) {
+                    long[] l1 = (long[]) valueA;
+                    long[] l2 = (long[]) valueB;
+                    for (int i = 0; i < l1.length; i++) {
+                        l1[i] = l1[i] + l2[i];
+                    }
+                    newMap.put(key, l1);
                 } else {
                     Object sum = SQLEvalVisitorUtils.add(valueA, valueB);
                     newMap.put(key, sum);
@@ -257,16 +262,16 @@ public final class DruidStatManagerFacade {
         return newMap;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static List<Map<String, Object>> mergeNamedList(List listA, List listB) {
+        List<Map<String, Object>> mergedList = new ArrayList<Map<String, Object>>();
         Map<String, Map<String, Object>> mapped = new HashMap<String, Map<String, Object>>();
         for (Object item : (List) listA) {
             Map<String, Object> map = (Map<String, Object>) item;
             String name = (String) map.get("name");
             mapped.put(name, map);
+            mergedList.add(map);
         }
-
-        List<Map<String, Object>> mergedList = new ArrayList<Map<String, Object>>();
         for (Object item : (List) listB) {
             Map<String, Object> mapB = (Map<String, Object>) item;
             String name = (String) mapB.get("name");
@@ -275,7 +280,6 @@ public final class DruidStatManagerFacade {
             Map<String, Object> mergedMap = mergWallStat(mapA, mapB);
             mergedList.add(mergedMap);
         }
-
         return mergedList;
     }
 
