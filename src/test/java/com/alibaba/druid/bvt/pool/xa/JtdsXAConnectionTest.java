@@ -10,7 +10,7 @@ import org.junit.Assert;
 import com.alibaba.druid.pool.xa.JtdsXAConnection;
 import com.alibaba.druid.pool.xa.JtdsXAResource;
 
-public class JtdsXAConnectionTest extends TestCase {
+public class JtdsXAConnectionTest{
 
     public void test_jtds() throws Exception {
         Constructor<JtdsConnection> constrcutor = JtdsConnection.class.getDeclaredConstructor();
