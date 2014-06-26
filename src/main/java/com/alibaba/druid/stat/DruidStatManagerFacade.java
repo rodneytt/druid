@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -215,7 +216,7 @@ public final class DruidStatManagerFacade {
                         break;
                     }
 
-                    String sql = (String) blackItem.get("sql");
+                    String sql = (String) blackItem.get("name");
                     Map<String, Object> oldItem = newSet.get(sql);
                     newSet.put(sql, mergWallStat(oldItem, blackItem));
                 }
@@ -226,7 +227,7 @@ public final class DruidStatManagerFacade {
                         break;
                     }
 
-                    String sql = (String) blackItem.get("sql");
+                    String sql = (String) blackItem.get("name");
                     Map<String, Object> oldItem = newSet.get(sql);
                     newSet.put(sql, mergWallStat(oldItem, blackItem));
                 }
@@ -265,20 +266,28 @@ public final class DruidStatManagerFacade {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static List<Map<String, Object>> mergeNamedList(List listA, List listB) {
         List<Map<String, Object>> mergedList = new ArrayList<Map<String, Object>>();
-        int len = listA.size() >= listB.size() ? listA.size() : listB.size();
-        for (int i = 0; i < len; i++) {
-            Map<String, Object> mapA = null;
-            Map<String, Object> mapB = null;
-            try {
-                mapA = (Map<String, Object>) listA.get(i);
-            } catch (Exception e) {
+        Iterator<Map<String, Object>> it = listB.iterator();
+        for (Object item : (List) listA) {
+            Map<String, Object> mapA = (Map<String, Object>) item;
+            String nameA = (String) mapA.get("name");
+            boolean find = false;
+            while (it.hasNext()) {
+                Map<String, Object> mapB = it.next();
+                String nameB = (String) mapB.get("name");
+                if (StringUtils.equalsIgnoreCase(nameA, nameB)) {
+                    Map<String, Object> mergedMap = mergWallStat(mapA, mapB);
+                    mergedList.add(mergedMap);
+                    it.remove();
+                    find = true;
+                }
             }
-            try {
-                mapB = (Map<String, Object>) listB.get(i);
-            } catch (Exception e) {
+            if (!find) {
+                mergedList.add(mapA);
             }
-            Map<String, Object> mergedMap = mergWallStat(mapA, mapB);
-            mergedList.add(mergedMap);
+        }
+        for (Object item : (List) listB) {
+            Map<String, Object> mapB = (Map<String, Object>) item;
+            mergedList.add(mapB);
         }
         return mergedList;
     }

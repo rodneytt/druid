@@ -131,7 +131,7 @@ public class WallSqlStatValue {
 
     public Map<String, Object> toMap() {
         Map<String, Object> sqlStatMap = new LinkedHashMap<String, Object>();
-        sqlStatMap.put("sql", sql);
+        sqlStatMap.put("name", sql);
         if (sql != sqlSample) {
             sqlStatMap.put("sample", sqlSample);
         }

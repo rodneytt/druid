@@ -34,18 +34,28 @@
 		<repository>
 			<id>local-file</id>
 			<url>file://${basedir}/lib/</url>
+		</repository>
+		<repository>
+			<id>chsi</id>
+			<name>Chsi Repository</name>
 			<layout>default</layout>
+			<url>http://maven.chsi.com.cn/maven2</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
 	<distributionManagement>
 		<repository>
-			<id>opensesame</id>
-			<url>dav:http://code.alibabatech.com/mvn/releases/</url>
+			<id>Chsi Repository</id>
+			<name>Repository Name</name>
+			<url>ftp://maven.chsi.com.cn</url>
 		</repository>
 		<snapshotRepository>
-			<id>opensesame</id>
-			<url>dav:http://code.alibabatech.com/mvn/snapshots/</url>
+			<id>Chsi Repository</id>
+			<name>Repository Name</name>
+			<url>ftp://maven.chsi.com.cn</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -89,8 +99,8 @@
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-webdav</artifactId>
-				<version>1.0-beta-2</version>
+				<artifactId>wagon-ftp</artifactId>
+				<version>2.2</version>
 			</extension>
 		</extensions>
 		<plugins>
