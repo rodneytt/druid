@@ -220,7 +220,7 @@ public class MySqlWallVisitor extends MySqlASTVisitorAdapter implements WallVisi
             int rowCount = ((SQLNumericLiteralExpr) x.getRowCount()).getNumber().intValue();
             if (rowCount == 0) {
                 if (context != null) {
-                    context.incrementWarnnings();
+                    context.incrementWarnings();
                 }
 
                 if (!provider.getConfig().isLimitZeroAllow()) {
@@ -445,72 +445,13 @@ public class MySqlWallVisitor extends MySqlASTVisitorAdapter implements WallVisi
 
     @Override
     public boolean visit(SQLCommentHint x) {
-        String text = x.getText();
-        text = text.trim();
-        if (text.startsWith("!")) {
-            text = text.substring(1);
-        }
-
-        if (text.length() == 0) {
-            return true;
-        }
-
-        if (Character.isDigit(text.charAt(0))) {
-            addViolation(new IllegalSQLObjectViolation(ErrorCode.EVIL_HINTS, "evil hints", SQLUtils.toMySqlString(x)));
-        }
-
-        text = text.toLowerCase();
-
-        for (int i = 0; i < text.length(); ++i) {
-            char ch = text.charAt(i);
-            switch (ch) {
-                case ';':
-                case '>':
-                case '=':
-                case '<':
-                case '&':
-                case '|':
-                case '^':
-                case '\n':
-                    addViolation(new IllegalSQLObjectViolation(ErrorCode.EVIL_HINTS, "evil hints",
-                                                               SQLUtils.toMySqlString(x)));
-                default:
-                    break;
-            }
-        }
-
-        if (text.indexOf("or") != -1 //
-            || text.indexOf("and") != -1 //
-            || text.indexOf("union") != -1 //
-
-            || text.indexOf("select") != -1 //
-            || text.indexOf("delete") != -1 //
-            || text.indexOf("insert") != -1 //
-            || text.indexOf("update") != -1 //
-            || text.indexOf("into") != -1 //
-
-            || text.indexOf("create") != -1 //
-            || text.indexOf("drop") != -1 //
-            || text.indexOf("alter") != -1 //
-            || text.indexOf("truncate") != -1 //
-
-            || text.indexOf("information_schema") != -1 //
-            || text.indexOf("mysql") != -1 //
-            || text.indexOf("performance_schema") != -1 //
-
-            || text.indexOf("sleep") != -1 //
-            || text.indexOf("benchmark") != -1 //
-            || text.indexOf("load_file") != -1 //
-        ) {
-            addViolation(new IllegalSQLObjectViolation(ErrorCode.EVIL_HINTS, "evil hints", SQLUtils.toMySqlString(x)));
-        }
-
+        WallVisitorUtils.check(this, x);
         return true;
     }
 
     @Override
     public boolean visit(MySqlShowCreateTableStatement x) {
-        String tableName = ((SQLName) x.getName()).getSimleName();
+        String tableName = ((SQLName) x.getName()).getSimpleName();
         WallContext context = WallContext.current();
         if (context != null) {
             WallSqlTableStat tableStat = context.getTableStat(tableName);
@@ -525,4 +466,5 @@ public class MySqlWallVisitor extends MySqlASTVisitorAdapter implements WallVisi
     public boolean visit(SQLCreateTriggerStatement x) {
         return false;
     }
+    
 }

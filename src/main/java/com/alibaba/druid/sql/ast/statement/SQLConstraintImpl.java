@@ -16,11 +16,31 @@
 package com.alibaba.druid.sql.ast.statement;
 
 import com.alibaba.druid.sql.ast.SQLName;
-import com.alibaba.druid.sql.ast.SQLObject;
+import com.alibaba.druid.sql.ast.SQLObjectImpl;
 
-public interface SQLConstaint extends SQLObject {
+public abstract class SQLConstraintImpl extends SQLObjectImpl implements SQLConstraint {
 
-    SQLName getName();
+    private SQLName name;
+    private Boolean enable;
 
-    void setName(SQLName value);
+    public SQLConstraintImpl(){
+
+    }
+
+    public SQLName getName() {
+        return name;
+    }
+
+    public void setName(SQLName name) {
+        this.name = name;
+    }
+
+    public Boolean getEnable() {
+        return enable;
+    }
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
+    }
+
 }

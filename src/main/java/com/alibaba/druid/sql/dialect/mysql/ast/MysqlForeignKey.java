@@ -27,7 +27,13 @@ public class MysqlForeignKey extends SQLForeignKeyImpl {
 
     private SQLName indexName;
 
-    private boolean hasConstaint;
+    private boolean hasConstraint;
+
+    private Match   referenceMatch;
+
+    private On      referenceOn;
+
+    private Option  referenceOption;
 
     public SQLName getIndexName() {
         return indexName;
@@ -37,12 +43,12 @@ public class MysqlForeignKey extends SQLForeignKeyImpl {
         this.indexName = indexName;
     }
 
-    public boolean isHasConstaint() {
-        return hasConstaint;
+    public boolean isHasConstraint() {
+        return hasConstraint;
     }
 
-    public void setHasConstaint(boolean hasConstaint) {
-        this.hasConstaint = hasConstaint;
+    public void setHasConstraint(boolean hasConstraint) {
+        this.hasConstraint = hasConstraint;
     }
 
     @Override
@@ -62,5 +68,53 @@ public class MysqlForeignKey extends SQLForeignKeyImpl {
             acceptChild(visitor, indexName);
         }
         visitor.endVisit(this);
+    }
+
+    public Match getReferenceMatch() {
+        return referenceMatch;
+    }
+
+    public void setReferenceMatch(Match referenceMatch) {
+        this.referenceMatch = referenceMatch;
+    }
+
+    public On getReferenceOn() {
+        return referenceOn;
+    }
+
+    public void setReferenceOn(On referenceOn) {
+        this.referenceOn = referenceOn;
+    }
+
+    public Option getReferenceOption() {
+        return referenceOption;
+    }
+
+    public void setReferenceOption(Option referenceOption) {
+        this.referenceOption = referenceOption;
+    }
+
+    public static enum Option {
+
+        RESTRICT("RESTRICT"), CASCADE("CASCADE"), SET_NULL("SET NULL"), NO_ACTION("NO ACTION");
+
+        private String text;
+
+        Option(String text){
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+    }
+
+    public static enum Match {
+        FULL, PARTIAL, SIMPLE;
+    }
+
+    public static enum On {
+        DELETE, UPDATE;
     }
 }

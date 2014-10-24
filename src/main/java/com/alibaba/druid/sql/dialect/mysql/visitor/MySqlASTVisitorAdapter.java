@@ -28,6 +28,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlExtractExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlIntervalExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlMatchAgainstExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOutFileExpr;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlSelectGroupByExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlUserName;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.CobarShowStatus;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlAlterTableAddColumn;
@@ -51,6 +52,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDescribeStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlExecuteStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlHelpStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlHintStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlKillStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlLoadDataInFileStatement;
@@ -1244,6 +1246,26 @@ public class MySqlASTVisitorAdapter extends SQLASTVisitorAdapter implements MySq
 
     @Override
     public void endVisit(MySqlSetPasswordStatement x) {
+
+    }
+
+    @Override
+    public boolean visit(MySqlHintStatement x) {
+        return true;
+    }
+
+    @Override
+    public void endVisit(MySqlHintStatement x) {
+        
+    }
+    
+    @Override
+    public boolean visit(MySqlSelectGroupByExpr x) {
+        return true;
+    }
+
+    @Override
+    public void endVisit(MySqlSelectGroupByExpr x) {
 
     }
 

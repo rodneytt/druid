@@ -15,12 +15,12 @@
  */
 package com.alibaba.druid.wall;
 
-import static com.alibaba.druid.wall.spi.WallVisitorUtils.loadResource;
+import com.alibaba.druid.wall.spi.WallVisitorUtils;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import com.alibaba.druid.wall.spi.WallVisitorUtils;
+import static com.alibaba.druid.wall.spi.WallVisitorUtils.loadResource;
 
 public class WallConfig implements WallConfigMBean {
 
@@ -40,6 +40,9 @@ public class WallConfig implements WallConfigMBean {
     private boolean             dropTableAllow              = true;
     private boolean             alterTableAllow             = true;
     private boolean             renameTableAllow            = true;
+    private boolean             hintAllow                   = true;
+    private boolean             lockTableAllow              = true;
+    private boolean             startTransactionAllow       = true;
 
     private boolean             conditionAndAlwayTrueAllow  = false;
     private boolean             conditionAndAlwayFalseAllow = false;
@@ -116,6 +119,9 @@ public class WallConfig implements WallConfigMBean {
     private boolean             conditionOpBitwseAllow      = true;
 
     private boolean             caseConditionConstAllow     = false;
+    
+    private boolean             completeInsertValuesCheck   = false;
+    private int                 insertValuesCheckSize       = 3;
 
     public WallConfig(){
 
@@ -151,22 +157,6 @@ public class WallConfig implements WallConfigMBean {
 
     public void setLimitZeroAllow(boolean limitZero) {
         this.limitZeroAllow = limitZero;
-    }
-
-    public boolean isConditionAndAlwayTrueAllow() {
-        return conditionAndAlwayTrueAllow;
-    }
-
-    public void setConditionAndAlwayTrueAllow(boolean conditionAndAlwayTrueAllow) {
-        this.conditionAndAlwayTrueAllow = conditionAndAlwayTrueAllow;
-    }
-
-    public boolean isConditionAndAlwayFalseAllow() {
-        return conditionAndAlwayFalseAllow;
-    }
-
-    public void setConditionAndAlwayFalseAllow(boolean conditionAndAlwayFalseAllow) {
-        this.conditionAndAlwayFalseAllow = conditionAndAlwayFalseAllow;
     }
 
     public boolean isUseAllow() {
@@ -215,14 +205,6 @@ public class WallConfig implements WallConfigMBean {
 
     public void setConditionOpXorAllow(boolean conditionOpXorAllow) {
         this.conditionOpXorAllow = conditionOpXorAllow;
-    }
-
-    public boolean isConditionOpBitwseAllow() {
-        return conditionOpBitwseAllow;
-    }
-
-    public void setConditionOpBitwseAllow(boolean conditionOpBitwseAllow) {
-        this.conditionOpBitwseAllow = conditionOpBitwseAllow;
     }
 
     public String getTenantTablePattern() {
@@ -364,14 +346,6 @@ public class WallConfig implements WallConfigMBean {
         this.truncateAllow = truncateAllow;
     }
 
-    public boolean isSelelctAllow() {
-        return selelctAllow;
-    }
-
-    public void setSelelctAllow(boolean selelctAllow) {
-        this.selelctAllow = selelctAllow;
-    }
-
     public boolean isSelectIntoAllow() {
         return selectIntoAllow;
     }
@@ -452,36 +426,12 @@ public class WallConfig implements WallConfigMBean {
         this.selectIntersectCheck = selectIntersectCheck;
     }
 
-    public boolean isSelectWhereAlwayTrueCheck() {
-        return selectWhereAlwayTrueCheck;
-    }
-
-    public void setSelectWhereAlwayTrueCheck(boolean selectWhereAlwayTrueCheck) {
-        this.selectWhereAlwayTrueCheck = selectWhereAlwayTrueCheck;
-    }
-
-    public boolean isSelectHavingAlwayTrueCheck() {
-        return selectHavingAlwayTrueCheck;
-    }
-
-    public void setSelectHavingAlwayTrueCheck(boolean selectHavingAlwayTrueCheck) {
-        this.selectHavingAlwayTrueCheck = selectHavingAlwayTrueCheck;
-    }
-
     public boolean isDeleteAllow() {
         return deleteAllow;
     }
 
     public void setDeleteAllow(boolean deleteAllow) {
         this.deleteAllow = deleteAllow;
-    }
-
-    public boolean isDeleteWhereAlwayTrueCheck() {
-        return deleteWhereAlwayTrueCheck;
-    }
-
-    public void setDeleteWhereAlwayTrueCheck(boolean deleteWhereAlwayTrueCheck) {
-        this.deleteWhereAlwayTrueCheck = deleteWhereAlwayTrueCheck;
     }
 
     public boolean isDeleteWhereNoneCheck() {
@@ -498,14 +448,6 @@ public class WallConfig implements WallConfigMBean {
 
     public void setUpdateAllow(boolean updateAllow) {
         this.updateAllow = updateAllow;
-    }
-
-    public boolean isUpdateWhereAlayTrueCheck() {
-        return updateWhereAlayTrueCheck;
-    }
-
-    public void setUpdateWhereAlayTrueCheck(boolean updateWhereAlayTrueCheck) {
-        this.updateWhereAlayTrueCheck = updateWhereAlayTrueCheck;
     }
 
     public boolean isUpdateWhereNoneCheck() {
@@ -713,6 +655,14 @@ public class WallConfig implements WallConfigMBean {
         this.callAllow = callAllow;
     }
 
+    public boolean isHintAllow() {
+        return hintAllow;
+    }
+
+    public void setHintAllow(boolean hintAllow) {
+        this.hintAllow = hintAllow;
+    }
+
     public static abstract interface TenantCallBack {
 
         public static enum StatementType {
@@ -737,6 +687,106 @@ public class WallConfig implements WallConfigMBean {
          * @param value tenantColumn对应的值
          */
         void filterResultsetTenantColumn(Object value);
+    }
+
+    public boolean isSelelctAllow() {
+        return selelctAllow;
+    }
+
+    public void setSelelctAllow(boolean selelctAllow) {
+        this.selelctAllow = selelctAllow;
+    }
+
+    public boolean isSelectWhereAlwayTrueCheck() {
+        return selectWhereAlwayTrueCheck;
+    }
+
+    public void setSelectWhereAlwayTrueCheck(boolean selectWhereAlwayTrueCheck) {
+        this.selectWhereAlwayTrueCheck = selectWhereAlwayTrueCheck;
+    }
+
+    public boolean isSelectHavingAlwayTrueCheck() {
+        return selectHavingAlwayTrueCheck;
+    }
+
+    public void setSelectHavingAlwayTrueCheck(boolean selectHavingAlwayTrueCheck) {
+        this.selectHavingAlwayTrueCheck = selectHavingAlwayTrueCheck;
+    }
+
+    public boolean isConditionAndAlwayTrueAllow() {
+        return conditionAndAlwayTrueAllow;
+    }
+
+    public void setConditionAndAlwayTrueAllow(boolean conditionAndAlwayTrueAllow) {
+        this.conditionAndAlwayTrueAllow = conditionAndAlwayTrueAllow;
+    }
+
+    public boolean isConditionAndAlwayFalseAllow() {
+        return conditionAndAlwayFalseAllow;
+    }
+
+    public void setConditionAndAlwayFalseAllow(boolean conditionAndAlwayFalseAllow) {
+        this.conditionAndAlwayFalseAllow = conditionAndAlwayFalseAllow;
+    }
+
+    public boolean isDeleteWhereAlwayTrueCheck() {
+        return deleteWhereAlwayTrueCheck;
+    }
+
+    public void setDeleteWhereAlwayTrueCheck(boolean deleteWhereAlwayTrueCheck) {
+        this.deleteWhereAlwayTrueCheck = deleteWhereAlwayTrueCheck;
+    }
+
+    public boolean isUpdateWhereAlayTrueCheck() {
+        return updateWhereAlayTrueCheck;
+    }
+
+    public void setUpdateWhereAlayTrueCheck(boolean updateWhereAlayTrueCheck) {
+        this.updateWhereAlayTrueCheck = updateWhereAlayTrueCheck;
+    }
+
+    public boolean isConditionOpBitwseAllow() {
+        return conditionOpBitwseAllow;
+    }
+
+    public void setConditionOpBitwseAllow(boolean conditionOpBitwseAllow) {
+        this.conditionOpBitwseAllow = conditionOpBitwseAllow;
+    }
+
+    public void setInited(boolean inited) {
+        this.inited = inited;
+    }
+
+    public boolean isLockTableAllow() {
+        return lockTableAllow;
+    }
+
+    public void setLockTableAllow(boolean lockTableAllow) {
+        this.lockTableAllow = lockTableAllow;
+    }
+
+    public boolean isStartTransactionAllow() {
+        return startTransactionAllow;
+    }
+
+    public void setStartTransactionAllow(boolean startTransactionAllow) {
+        this.startTransactionAllow = startTransactionAllow;
+    }
+
+    public boolean isCompleteInsertValuesCheck() {
+        return completeInsertValuesCheck;
+    }
+
+    public void setCompleteInsertValuesCheck(boolean completeInsertValuesCheck) {
+        this.completeInsertValuesCheck = completeInsertValuesCheck;
+    }
+
+    public int getInsertValuesCheckSize() {
+        return insertValuesCheckSize;
+    }
+
+    public void setInsertValuesCheckSize(int insertValuesCheckSize) {
+        this.insertValuesCheckSize = insertValuesCheckSize;
     }
 
 }

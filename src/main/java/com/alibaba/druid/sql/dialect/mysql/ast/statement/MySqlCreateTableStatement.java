@@ -34,8 +34,6 @@ import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public class MySqlCreateTableStatement extends SQLCreateTableStatement implements MySqlStatement {
 
-    private boolean                ifNotExiists = false;
-
     private Map<String, SQLObject> tableOptions = new LinkedHashMap<String, SQLObject>();
 
     protected SQLSelect            query;
@@ -43,6 +41,8 @@ public class MySqlCreateTableStatement extends SQLCreateTableStatement implement
     private SQLPartitioningClause  partitioning;
 
     private List<SQLCommentHint>   hints        = new ArrayList<SQLCommentHint>();
+
+    private List<SQLCommentHint>   optionHints  = new ArrayList<SQLCommentHint>();
 
     private SQLExprTableSource     like;
 
@@ -97,14 +97,6 @@ public class MySqlCreateTableStatement extends SQLCreateTableStatement implement
         this.query = query;
     }
 
-    public boolean isIfNotExiists() {
-        return ifNotExiists;
-    }
-
-    public void setIfNotExiists(boolean ifNotExiists) {
-        this.ifNotExiists = ifNotExiists;
-    }
-
     @Override
     protected void accept0(SQLASTVisitor visitor) {
         if (visitor instanceof MySqlASTVisitor) {
@@ -155,5 +147,13 @@ public class MySqlCreateTableStatement extends SQLCreateTableStatement implement
             visitor.endVisit(this);
         }
 
+    }
+
+    public List<SQLCommentHint> getOptionHints() {
+        return optionHints;
+    }
+
+    public void setOptionHints(List<SQLCommentHint> optionHints) {
+        this.optionHints = optionHints;
     }
 }

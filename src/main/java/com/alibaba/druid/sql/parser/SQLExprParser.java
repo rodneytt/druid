@@ -62,14 +62,14 @@ import com.alibaba.druid.sql.ast.expr.SQLUnaryOperator;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.NotNullConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLAssignItem;
-import com.alibaba.druid.sql.ast.statement.SQLCharactorDataType;
+import com.alibaba.druid.sql.ast.statement.SQLCharacterDataType;
 import com.alibaba.druid.sql.ast.statement.SQLCheck;
 import com.alibaba.druid.sql.ast.statement.SQLColumnCheck;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
 import com.alibaba.druid.sql.ast.statement.SQLColumnPrimaryKey;
 import com.alibaba.druid.sql.ast.statement.SQLColumnReference;
 import com.alibaba.druid.sql.ast.statement.SQLColumnUniqueKey;
-import com.alibaba.druid.sql.ast.statement.SQLConstaint;
+import com.alibaba.druid.sql.ast.statement.SQLConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLForeignKeyConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLForeignKeyImpl;
 import com.alibaba.druid.sql.ast.statement.SQLPrimaryKey;
@@ -306,6 +306,8 @@ public class SQLExprParser extends SQLParser {
             case EXCLUSIVE:
             case MODE:
             case ADVISE:
+            case VIEW:
+            case ESCAPE:
                 sqlExpr = new SQLIdentifierExpr(lexer.stringVal());
                 lexer.nextToken();
                 break;
@@ -966,7 +968,7 @@ public class SQLExprParser extends SQLParser {
     }
 
     public final SQLExpr bitOrRest(SQLExpr expr) {
-        if (lexer.token() == Token.BAR) {
+        while (lexer.token() == Token.BAR) {
             lexer.nextToken();
             SQLExpr rightExp = bitAnd();
             expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.BitwiseOr, rightExp);
@@ -1313,7 +1315,7 @@ public class SQLExprParser extends SQLParser {
         String typeName = typeExpr.toString();
 
         if (isCharType(typeName)) {
-            SQLCharactorDataType charType = new SQLCharactorDataType(typeName);
+            SQLCharacterDataType charType = new SQLCharacterDataType(typeName);
 
             if (lexer.token() == Token.LPAREN) {
                 lexer.nextToken();
@@ -1358,7 +1360,7 @@ public class SQLExprParser extends SQLParser {
         ;
     }
 
-    protected SQLDataType parseCharTypeRest(SQLCharactorDataType charType) {
+    protected SQLDataType parseCharTypeRest(SQLCharacterDataType charType) {
         if (identifierEquals("CHARACTER")) {
             lexer.nextToken();
 
@@ -1417,7 +1419,7 @@ public class SQLExprParser extends SQLParser {
         if (lexer.token() == Token.NOT) {
             lexer.nextToken();
             accept(Token.NULL);
-            column.getConstaints().add(new NotNullConstraint());
+            column.getConstraints().add(new NotNullConstraint());
             return parseColumnRest(column);
         }
 
@@ -1430,7 +1432,7 @@ public class SQLExprParser extends SQLParser {
         if (lexer.token == Token.PRIMARY) {
             lexer.nextToken();
             accept(Token.KEY);
-            column.getConstaints().add(new SQLColumnPrimaryKey());
+            column.getConstraints().add(new SQLColumnPrimaryKey());
             return parseColumnRest(column);
         }
 
@@ -1439,7 +1441,7 @@ public class SQLExprParser extends SQLParser {
             if (lexer.token() == Token.KEY) {
                 lexer.nextToken();
             }
-            column.getConstaints().add(new SQLColumnPrimaryKey());
+            column.getConstraints().add(new SQLColumnPrimaryKey());
             return parseColumnRest(column);
         }
 
@@ -1453,7 +1455,7 @@ public class SQLExprParser extends SQLParser {
                 accept(Token.KEY);
                 SQLColumnPrimaryKey pk = new SQLColumnPrimaryKey();
                 pk.setName(name);
-                column.getConstaints().add(pk);
+                column.getConstraints().add(pk);
                 return parseColumnRest(column);
             }
 
@@ -1461,7 +1463,7 @@ public class SQLExprParser extends SQLParser {
                 lexer.nextToken();
                 SQLColumnUniqueKey uk = new SQLColumnUniqueKey();
                 uk.setName(name);
-                column.getConstaints().add(uk);
+                column.getConstraints().add(uk);
                 return parseColumnRest(column);
             }
 
@@ -1473,7 +1475,7 @@ public class SQLExprParser extends SQLParser {
                 accept(Token.LPAREN);
                 this.names(ref.getColumns(), ref);
                 accept(Token.RPAREN);
-                column.getConstaints().add(ref);
+                column.getConstraints().add(ref);
                 return parseColumnRest(column);
             }
 
@@ -1482,7 +1484,7 @@ public class SQLExprParser extends SQLParser {
                 accept(Token.NULL);
                 NotNullConstraint notNull = new NotNullConstraint();
                 notNull.setName(name);
-                column.getConstaints().add(notNull);
+                column.getConstraints().add(notNull);
                 return parseColumnRest(column);
             }
 
@@ -1490,7 +1492,7 @@ public class SQLExprParser extends SQLParser {
                 SQLColumnCheck check = parseColumnCheck();
                 check.setName(name);
                 check.setParent(column);
-                column.getConstaints().add(check);
+                column.getConstraints().add(check);
                 return parseColumnRest(column);
             }
 
@@ -1506,7 +1508,7 @@ public class SQLExprParser extends SQLParser {
 
         if (lexer.token == Token.CHECK) {
             SQLColumnCheck check = parseColumnCheck();
-            column.getConstaints().add(check);
+            column.getConstraints().add(check);
             return parseColumnRest(column);
         }
 
@@ -1589,7 +1591,7 @@ public class SQLExprParser extends SQLParser {
         }
     }
 
-    public SQLConstaint parseConstaint() {
+    public SQLConstraint parseConstaint() {
         SQLName name = null;
 
         if (lexer.token() == Token.CONSTRAINT) {
@@ -1597,7 +1599,7 @@ public class SQLExprParser extends SQLParser {
             name = this.name();
         }
 
-        SQLConstaint constraint;
+        SQLConstraint constraint;
         if (lexer.token() == Token.PRIMARY) {
             constraint = parsePrimaryKey();
         } else if (lexer.token() == Token.UNIQUE) {

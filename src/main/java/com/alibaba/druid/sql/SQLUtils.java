@@ -117,6 +117,10 @@ public class SQLUtils {
         return format(sql, JdbcUtils.ODPS);
     }
 
+    public static String formatSQLServer(String sql) {
+        return format(sql, JdbcUtils.SQL_SERVER);
+    }
+    
     public static String toOracleString(SQLObject sqlObject) {
         StringBuilder out = new StringBuilder();
         sqlObject.accept(new OracleOutputVisitor(out, false));
@@ -198,9 +202,12 @@ public class SQLUtils {
         if (parameters != null) {
             visitor.setParameters(parameters);
         }
-
-        for (SQLStatement stmt : statementList) {
-            stmt.accept(visitor);
+        
+        for(int i =0; i<statementList.size(); i++) {
+            if(i>0) {
+                out.append(";\n");
+            }
+            statementList.get(i).accept(visitor);
         }
 
         return out.toString();

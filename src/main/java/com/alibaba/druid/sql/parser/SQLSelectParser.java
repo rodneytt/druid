@@ -64,7 +64,7 @@ public class SQLSelectParser extends SQLParser {
             select.setOrderBy(parseOrderBy());
         }
 
-        if (lexer.token() == Token.HINT) {
+        while(lexer.token() == Token.HINT) {
             this.exprParser.parseHints(select.getHints());
         }
 
@@ -202,6 +202,7 @@ public class SQLSelectParser extends SQLParser {
 
             for (;;) {
                 SQLWithSubqueryClause.Entry entry = new SQLWithSubqueryClause.Entry();
+                entry.setParent(withQueryClause);
                 entry.setName((SQLIdentifierExpr) this.exprParser.name());
 
                 if (lexer.token() == Token.LPAREN) {
@@ -284,7 +285,12 @@ public class SQLSelectParser extends SQLParser {
 
     protected SQLSelectItem parseSelectItem() {
         SQLExpr expr;
+        boolean connectByRoot = false;
         if (lexer.token() == Token.IDENTIFIER) {
+            if (identifierEquals("CONNECT_BY_ROOT")) {
+                connectByRoot = true;
+                lexer.nextToken();
+            }
             expr = new SQLIdentifierExpr(lexer.stringVal());
             lexer.nextTokenComma();
 
@@ -297,7 +303,7 @@ public class SQLSelectParser extends SQLParser {
         }
         final String alias = as();
 
-        return new SQLSelectItem(expr, alias);
+        return new SQLSelectItem(expr, alias, connectByRoot);
     }
 
     public void parseFrom(SQLSelectQueryBlock queryBlock) {
@@ -358,7 +364,7 @@ public class SQLSelectParser extends SQLParser {
     protected SQLTableSource parseTableSourceRest(SQLTableSource tableSource) {
         if ((tableSource.getAlias() == null) || (tableSource.getAlias().length() == 0)) {
             if (lexer.token() != Token.LEFT && lexer.token() != Token.RIGHT && lexer.token() != Token.FULL
-                && !identifierEquals("STRAIGHT_JOIN") && !identifierEquals("CROSS")) {
+                && !identifierEquals("STRAIGHT_JOIN") && !identifierEquals("CROSS") && lexer.token != Token.OUTER) {
                 String alias = as();
                 if (alias != null) {
                     tableSource.setAlias(alias);
@@ -406,8 +412,19 @@ public class SQLSelectParser extends SQLParser {
             joinType = SQLJoinTableSource.JoinType.STRAIGHT_JOIN;
         } else if (identifierEquals("CROSS")) {
             lexer.nextToken();
-            accept(Token.JOIN);
-            joinType = SQLJoinTableSource.JoinType.CROSS_JOIN;
+            if (lexer.token() == Token.JOIN) {
+                lexer.nextToken();
+                joinType = SQLJoinTableSource.JoinType.CROSS_JOIN;
+            } else if (identifierEquals("APPLY")) {
+                lexer.nextToken();
+                joinType = SQLJoinTableSource.JoinType.CROSS_APPLY;
+            }
+        } else if (lexer.token() == Token.OUTER) {
+            lexer.nextToken();
+            if (identifierEquals("APPLY")) {
+                lexer.nextToken();
+                joinType = SQLJoinTableSource.JoinType.OUTER_APPLY;
+            }
         }
 
         if (joinType != null) {

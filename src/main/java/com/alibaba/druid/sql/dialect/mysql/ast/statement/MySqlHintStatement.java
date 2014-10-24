@@ -13,30 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.druid.sql.ast.statement;
+package com.alibaba.druid.sql.dialect.mysql.ast.statement;
 
-import com.alibaba.druid.sql.ast.SQLName;
-import com.alibaba.druid.sql.ast.SQLObjectImpl;
-import com.alibaba.druid.sql.visitor.SQLASTVisitor;
+import java.util.List;
 
-public class SQLAlterTableDropForeinKey extends SQLObjectImpl implements SQLAlterTableItem {
+import com.alibaba.druid.sql.ast.SQLCommentHint;
+import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitor;
 
-    private SQLName indexName;
+public class MySqlHintStatement extends MySqlStatementImpl {
 
-    public SQLName getIndexName() {
-        return indexName;
-    }
+    private List<SQLCommentHint> hints;
 
-    public void setIndexName(SQLName indexName) {
-        this.indexName = indexName;
-    }
-
-    @Override
-    protected void accept0(SQLASTVisitor visitor) {
+    public void accept0(MySqlASTVisitor visitor) {
         if (visitor.visit(this)) {
-            acceptChild(visitor, indexName);
+            acceptChild(visitor, this.hints);
         }
         visitor.endVisit(this);
+    }
+
+    public List<SQLCommentHint> getHints() {
+        return hints;
+    }
+
+    public void setHints(List<SQLCommentHint> hints) {
+        this.hints = hints;
     }
 
 }
