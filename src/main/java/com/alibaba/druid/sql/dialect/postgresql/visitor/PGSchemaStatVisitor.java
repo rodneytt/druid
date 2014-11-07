@@ -23,7 +23,9 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.PGWithClause;
 import com.alibaba.druid.sql.dialect.postgresql.ast.PGWithQuery;
+import com.alibaba.druid.sql.dialect.postgresql.ast.expr.PGArrayExpr;
 import com.alibaba.druid.sql.dialect.postgresql.ast.expr.PGParameter;
+import com.alibaba.druid.sql.dialect.postgresql.ast.expr.PGTypeCastExpr;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGDeleteStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGFunctionTableSource;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
@@ -34,6 +36,7 @@ import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock.PGLi
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock.WindowClause;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGUpdateStatement;
+import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGValuesQuery;
 import com.alibaba.druid.sql.visitor.SchemaStatVisitor;
 import com.alibaba.druid.stat.TableStat;
 import com.alibaba.druid.stat.TableStat.Mode;
@@ -274,5 +277,36 @@ public class PGSchemaStatVisitor extends SchemaStatVisitor implements PGASTVisit
     @Override
     public void endVisit(PGLimit x) {
         
+    }
+    
+    @Override
+    public boolean visit(PGTypeCastExpr x) {
+        x.getExpr().accept(this);
+        return false;
+    }
+    
+    @Override
+    public void endVisit(PGTypeCastExpr x) {
+        
+    }
+
+    @Override
+    public void endVisit(PGValuesQuery x) {
+        
+    }
+
+    @Override
+    public boolean visit(PGValuesQuery x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGArrayExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGArrayExpr x) {
+        return true;
     }
 }

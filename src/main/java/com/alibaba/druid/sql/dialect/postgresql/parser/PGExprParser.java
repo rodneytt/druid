@@ -15,10 +15,11 @@
  */
 package com.alibaba.druid.sql.dialect.postgresql.parser;
 
+import com.alibaba.druid.sql.ast.SQLDataType;
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
 import com.alibaba.druid.sql.dialect.postgresql.ast.PGOrderBy;
+import com.alibaba.druid.sql.dialect.postgresql.ast.expr.PGArrayExpr;
+import com.alibaba.druid.sql.dialect.postgresql.ast.expr.PGTypeCastExpr;
 import com.alibaba.druid.sql.parser.Lexer;
 import com.alibaba.druid.sql.parser.SQLExprParser;
 import com.alibaba.druid.sql.parser.Token;
@@ -62,12 +63,28 @@ public class PGExprParser extends SQLExprParser {
 
         return null;
     }
+    
+    public SQLExpr primary() {
+        if (lexer.token() == Token.ARRAY) {
+            lexer.nextToken();
+            PGArrayExpr array = new PGArrayExpr();
+            accept(Token.LBRACKET);
+            this.exprList(array.getValues(), array);
+            accept(Token.RBRACKET);
+            return primaryRest(array);
+        }
+        return super.primary();
+    }
 
     public SQLExpr primaryRest(SQLExpr expr) {
         if (lexer.token() == Token.COLONCOLON) {
             lexer.nextToken();
-            SQLExpr typeExpr = this.expr();
-            SQLBinaryOpExpr castExpr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.PostgresStyleTypeCast, typeExpr);
+            SQLDataType dataType = this.parseDataType();
+            
+            PGTypeCastExpr castExpr = new PGTypeCastExpr();
+            
+            castExpr.setExpr(expr);
+            castExpr.setDataType(dataType);
 
             return primaryRest(castExpr);
         }

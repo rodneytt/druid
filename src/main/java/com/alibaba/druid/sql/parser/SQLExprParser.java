@@ -87,9 +87,17 @@ public class SQLExprParser extends SQLParser {
     public SQLExprParser(String sql){
         super(sql);
     }
+    
+    public SQLExprParser(String sql, String dbType){
+        super(sql, dbType);
+    }
 
     public SQLExprParser(Lexer lexer){
         super(lexer);
+    }
+    
+    public SQLExprParser(Lexer lexer, String dbType){
+        super(lexer, dbType);
     }
 
     public SQLExpr expr() {
@@ -308,6 +316,7 @@ public class SQLExprParser extends SQLParser {
             case ADVISE:
             case VIEW:
             case ESCAPE:
+            case OVER:
                 sqlExpr = new SQLIdentifierExpr(lexer.stringVal());
                 lexer.nextToken();
                 break;
@@ -490,7 +499,7 @@ public class SQLExprParser extends SQLParser {
                 break;
             case BANG:
                 lexer.nextToken();
-                SQLExpr bangExpr = expr();
+                SQLExpr bangExpr = primary();
                 sqlExpr = new SQLUnaryExpr(SQLUnaryOperator.Not, bangExpr);
                 break;
             case LITERAL_HEX:
@@ -509,50 +518,16 @@ public class SQLExprParser extends SQLParser {
                 }
                 break;
             case ANY:
-                lexer.nextToken();
-                if (lexer.token() == Token.LPAREN) {
-                    SQLAnyExpr anyExpr = new SQLAnyExpr();
-
-                    accept(Token.LPAREN);
-                    SQLSelect anySubQuery = createSelectParser().select();
-                    anyExpr.setSubQuery(anySubQuery);
-                    accept(Token.RPAREN);
-
-                    anySubQuery.setParent(anyExpr);
-
-                    sqlExpr = anyExpr;
-                } else {
-                    sqlExpr = new SQLIdentifierExpr("ANY");
-                }
+                sqlExpr = parseAny();
                 break;
             case SOME:
-                lexer.nextToken();
-                SQLSomeExpr someExpr = new SQLSomeExpr();
-
-                accept(Token.LPAREN);
-                SQLSelect someSubQuery = createSelectParser().select();
-                someExpr.setSubQuery(someSubQuery);
-                accept(Token.RPAREN);
-
-                someSubQuery.setParent(someExpr);
-
-                sqlExpr = someExpr;
+                sqlExpr = parseSome();
                 break;
             case ALL:
-                lexer.nextToken();
-                SQLAllExpr allExpr = new SQLAllExpr();
-
-                accept(Token.LPAREN);
-                SQLSelect allSubQuery = createSelectParser().select();
-                allExpr.setSubQuery(allSubQuery);
-                accept(Token.RPAREN);
-
-                allSubQuery.setParent(allExpr);
-
-                sqlExpr = allExpr;
+                sqlExpr = parseAll();
                 break;
             case LITERAL_ALIAS:
-                sqlExpr = new SQLIdentifierExpr('"' + lexer.stringVal() + '"');
+                sqlExpr = parseAliasExpr(lexer.stringVal());
                 lexer.nextToken();
                 break;
             case EOF:
@@ -570,6 +545,70 @@ public class SQLExprParser extends SQLParser {
         }
 
         return primaryRest(sqlExpr);
+    }
+
+    protected SQLExpr parseAll() {
+        SQLExpr sqlExpr;
+        lexer.nextToken();
+        SQLAllExpr allExpr = new SQLAllExpr();
+
+        accept(Token.LPAREN);
+        SQLSelect allSubQuery = createSelectParser().select();
+        allExpr.setSubQuery(allSubQuery);
+        accept(Token.RPAREN);
+
+        allSubQuery.setParent(allExpr);
+
+        sqlExpr = allExpr;
+        return sqlExpr;
+    }
+
+    protected SQLExpr parseSome() {
+        SQLExpr sqlExpr;
+        lexer.nextToken();
+        SQLSomeExpr someExpr = new SQLSomeExpr();
+
+        accept(Token.LPAREN);
+        SQLSelect someSubQuery = createSelectParser().select();
+        someExpr.setSubQuery(someSubQuery);
+        accept(Token.RPAREN);
+
+        someSubQuery.setParent(someExpr);
+
+        sqlExpr = someExpr;
+        return sqlExpr;
+    }
+
+    protected SQLExpr parseAny() {
+        SQLExpr sqlExpr;
+        lexer.nextToken();
+        if (lexer.token() == Token.LPAREN) {
+            accept(Token.LPAREN);
+            
+            if (lexer.token() == Token.IDENTIFIER) {
+                SQLExpr expr = this.expr();
+                SQLMethodInvokeExpr methodInvokeExpr = new SQLMethodInvokeExpr("ANY");
+                methodInvokeExpr.addParameter(expr);
+                accept(Token.RPAREN);
+                return methodInvokeExpr;
+            }
+            
+            SQLAnyExpr anyExpr = new SQLAnyExpr();
+            SQLSelect anySubQuery = createSelectParser().select();
+            anyExpr.setSubQuery(anySubQuery);
+            accept(Token.RPAREN);
+
+            anySubQuery.setParent(anyExpr);
+
+            sqlExpr = anyExpr;
+        } else {
+            sqlExpr = new SQLIdentifierExpr("ANY");
+        }
+        return sqlExpr;
+    }
+    
+    protected SQLExpr parseAliasExpr(String alias) {
+        return new SQLIdentifierExpr('"' + alias + '"');
     }
 
     protected SQLExpr parseInterval() {
@@ -1226,6 +1265,13 @@ public class SQLExprParser extends SQLParser {
                 rightExp = primary();
                 expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.Escape, rightExp);
             }
+        } else if (identifierEquals("RLIKE")) {
+            lexer.nextToken();
+            rightExp = equality();
+
+            rightExp = relationalRest(rightExp);
+
+            expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.RLike, rightExp);
         } else if (lexer.token() == (Token.NOT)) {
             lexer.nextToken();
             expr = notRationalRest(expr);
@@ -1299,6 +1345,13 @@ public class SQLExprParser extends SQLParser {
             expr = new SQLBetweenExpr(expr, true, beginExpr, endExpr);
 
             return expr;
+        } else if (identifierEquals("RLIKE")) {
+            lexer.nextToken();
+            SQLExpr rightExp = primary();
+
+            rightExp = relationalRest(rightExp);
+
+            return new SQLBinaryOpExpr(expr, SQLBinaryOperator.NotRLike, rightExp);
         } else {
             throw new ParserException("TODO " + lexer.token());
         }

@@ -110,6 +110,8 @@ public class MySqlLexer extends Lexer {
         if (commentHandler != null && commentHandler.handle(lastToken, stringVal)) {
             return;
         }
+        
+        endOfComment = isEOF();
 
         if (!isAllowComment() && (isEOF() || !isSafeComment(stringVal))) {
             throw new NotAllowCommentException();
@@ -355,9 +357,11 @@ public class MySqlLexer extends Lexer {
                     token = LITERAL_CHARS;
                     break;
                 } else {
-                    initBuff(bufPos);
-                    arraycopy(mark + 1, buf, 0, bufPos);
-                    hasSpecial = true;
+                    if (!hasSpecial) {
+                        initBuff(bufPos);
+                        arraycopy(mark + 1, buf, 0, bufPos);
+                        hasSpecial = true;
+                    }
                     putChar('\'');
                     continue;
                 }
@@ -376,7 +380,6 @@ public class MySqlLexer extends Lexer {
         }
 
         if (!hasSpecial) {
-            stringVal = "";
             stringVal = subString(mark + 1, bufPos);
         } else {
             stringVal = new String(buf, 0, bufPos);
@@ -448,6 +451,8 @@ public class MySqlLexer extends Lexer {
                 return;
             }
 
+            endOfComment = isEOF();
+            
             if (!isHint && !isAllowComment() && (isEOF() || !isSafeComment(stringVal))) {
                 throw new NotAllowCommentException();
             }
@@ -489,6 +494,8 @@ public class MySqlLexer extends Lexer {
                 return;
             }
 
+            endOfComment = isEOF();
+            
             if (!isAllowComment() && (isEOF() || !isSafeComment(stringVal))) {
                 throw new NotAllowCommentException();
             }
