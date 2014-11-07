@@ -29,41 +29,41 @@ import com.alibaba.druid.support.spring.stat.DruidStatInterceptor;
 @SuppressWarnings("serial")
 public class StatAnnotationAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
 
-	private Advice advice;
-	private Pointcut pointcut;
-	private DruidStatInterceptor druidStatInterceptor;
-	
-	public StatAnnotationAdvisor(DruidStatInterceptor druidStatInterceptor) {
-		this.druidStatInterceptor = druidStatInterceptor;
-		this.advice = buildAdvice();
-		this.pointcut = buildPointcut();
-	}
+    private Advice advice;
+    private Pointcut pointcut;
+    private DruidStatInterceptor druidStatInterceptor;
 
-	public Pointcut getPointcut() {
-		return this.pointcut;
-	}
+    public StatAnnotationAdvisor(DruidStatInterceptor druidStatInterceptor) {
+        this.druidStatInterceptor = druidStatInterceptor;
+        this.advice = buildAdvice();
+        this.pointcut = buildPointcut();
+    }
 
-	public Advice getAdvice() {
-		return this.advice;
-	}
+    public Pointcut getPointcut() {
+        return this.pointcut;
+    }
 
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (this.advice instanceof BeanFactoryAware) {
-			((BeanFactoryAware) this.advice).setBeanFactory(beanFactory);
-		}
-	}
-	
-	protected Advice buildAdvice() {
-		return druidStatInterceptor;
-	}
+    public Advice getAdvice() {
+        return this.advice;
+    }
 
-	protected Pointcut buildPointcut() {
-		Pointcut cpc = new AnnotationMatchingPointcut(Stat.class, true);
-		Pointcut mpc = AnnotationMatchingPointcut.forMethodAnnotation(Stat.class);
-		
-		ComposablePointcut result = new ComposablePointcut(cpc).union(mpc);
-		
-		return result;
-	}
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        if (this.advice instanceof BeanFactoryAware) {
+            ((BeanFactoryAware) this.advice).setBeanFactory(beanFactory);
+        }
+    }
+
+    protected Advice buildAdvice() {
+        return druidStatInterceptor;
+    }
+
+    protected Pointcut buildPointcut() {
+        Pointcut cpc = new AnnotationMatchingPointcut(Stat.class, true);
+        Pointcut mpc = AnnotationMatchingPointcut.forMethodAnnotation(Stat.class);
+
+        ComposablePointcut result = new ComposablePointcut(cpc).union(mpc);
+
+        return result;
+    }
 
 }

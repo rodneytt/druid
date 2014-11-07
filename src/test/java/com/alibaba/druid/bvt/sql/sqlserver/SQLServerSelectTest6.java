@@ -27,28 +27,20 @@ public class SQLServerSelectTest6 extends TestCase {
 
     public void test_isEmpty() throws Exception {
         String sql = "WITH DirReps(ManagerID, DirectReports) AS " + //
-                     "(" + //
-                     "    SELECT ManagerID, COUNT(*) " + //
-                     "    FROM HumanResources.Employee AS e" + //
-                     "    WHERE ManagerID IS NOT NULL" + //
-                     "    GROUP BY ManagerID" + //
-                     ")" + //
-                     "SELECT ManagerID, DirectReports " + //
-                     "FROM DirReps " + //
-                     "ORDER BY ManagerID;";
+                "(" + //
+                "    SELECT ManagerID, COUNT(*) " + //
+                "    FROM HumanResources.Employee AS e" + //
+                "    WHERE ManagerID IS NOT NULL" + //
+                "    GROUP BY ManagerID" + //
+                ")" + //
+                "SELECT ManagerID, DirectReports " + //
+                "FROM DirReps " + //
+                "ORDER BY ManagerID;";
 
-        String expect = "WITH" +
-        		"\n\tDirReps (ManagerID, DirectReports)" +
-        		"\n\tAS" +
-        		"\n\t(" +
-        		"\n\t\tSELECT ManagerID, COUNT(*)" +
-        		"\n\t\tFROM HumanResources.Employee e" +
-        		"\n\t\tWHERE ManagerID IS NOT NULL" +
-        		"\n\t\tGROUP BY ManagerID" +
-        		"\n\t)" +
-        		"\nSELECT ManagerID, DirectReports" +
-        		"\nFROM DirReps" +
-        		"\nORDER BY ManagerID";
+        String expect = "WITH" + "\n\tDirReps (ManagerID, DirectReports)" + "\n\tAS" + "\n\t("
+                + "\n\t\tSELECT ManagerID, COUNT(*)" + "\n\t\tFROM HumanResources.Employee e"
+                + "\n\t\tWHERE ManagerID IS NOT NULL" + "\n\t\tGROUP BY ManagerID" + "\n\t)"
+                + "\nSELECT ManagerID, DirectReports" + "\nFROM DirReps" + "\nORDER BY ManagerID";
 
         SQLServerStatementParser parser = new SQLServerStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);

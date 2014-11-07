@@ -43,7 +43,7 @@ public class MySqlAlterTableTest15 extends TestCase {
 
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("ALTER TABLE st_jklsxxb" + //
-                            "\n\tDISABLE CONSTRAINT FK_ST_xxx_REFERENCE_ST_xxx", output);
+                "\n\tDISABLE CONSTRAINT FK_ST_xxx_REFERENCE_ST_xxx", output);
 
         Assert.assertEquals(1, visitor.getTables().size());
         Assert.assertEquals(0, visitor.getColumns().size());

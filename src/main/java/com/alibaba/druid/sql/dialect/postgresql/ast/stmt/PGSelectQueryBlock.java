@@ -30,19 +30,21 @@ import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public class PGSelectQueryBlock extends SQLSelectQueryBlock {
 
-    private PGWithClause  with;
+    private PGWithClause with;
     private List<SQLExpr> distinctOn = new ArrayList<SQLExpr>(2);
-    private SQLExpr       limit;
-    private SQLExpr       offset;
-    private WindowClause  window;
+    private SQLExpr limit;
+    private SQLExpr offset;
+    private WindowClause window;
 
-    private SQLOrderBy    orderBy;
-    private FetchClause   fetch;
-    private ForClause     forClause;
-    private IntoOption    intoOption;
+    private SQLOrderBy orderBy;
+    private FetchClause fetch;
+    private ForClause forClause;
+    private IntoOption intoOption;
 
     public static enum IntoOption {
-        TEMPORARY, TEMP, UNLOGGED
+        TEMPORARY,
+        TEMP,
+        UNLOGGED
     }
 
     public IntoOption getIntoOption() {
@@ -143,7 +145,7 @@ public class PGSelectQueryBlock extends SQLSelectQueryBlock {
 
     public static class WindowClause extends PGSQLObjectImpl {
 
-        private SQLExpr       name;
+        private SQLExpr name;
         private List<SQLExpr> definition = new ArrayList<SQLExpr>(2);
 
         public SQLExpr getName() {
@@ -175,10 +177,11 @@ public class PGSelectQueryBlock extends SQLSelectQueryBlock {
     public static class FetchClause extends PGSQLObjectImpl {
 
         public static enum Option {
-            FIRST, NEXT
+            FIRST,
+            NEXT
         }
 
-        private Option  option;
+        private Option option;
         private SQLExpr count;
 
         public Option getOption() {
@@ -210,12 +213,13 @@ public class PGSelectQueryBlock extends SQLSelectQueryBlock {
     public static class ForClause extends PGSQLObjectImpl {
 
         public static enum Option {
-            UPDATE, SHARE
+            UPDATE,
+            SHARE
         }
 
         private List<SQLExpr> of = new ArrayList<SQLExpr>(2);
-        private boolean       noWait;
-        private Option        option;
+        private boolean noWait;
+        private Option option;
 
         public Option getOption() {
             return option;
@@ -249,9 +253,10 @@ public class PGSelectQueryBlock extends SQLSelectQueryBlock {
             visitor.endVisit(this);
         }
     }
+
     public static class PGLimit extends SQLObjectImpl implements SQLExpr {
 
-        public PGLimit(){
+        public PGLimit() {
 
         }
 
@@ -283,21 +288,17 @@ public class PGSelectQueryBlock extends SQLSelectQueryBlock {
         @Override
         protected void accept0(SQLASTVisitor visitor) {
             if (visitor instanceof PGASTVisitor) {
-            	PGASTVisitor pgVisitor = (PGASTVisitor) visitor;
+                PGASTVisitor pgVisitor = (PGASTVisitor) visitor;
 
                 if (pgVisitor.visit(this)) {
-                    if (pgVisitor instanceof PGOutputVisitor)
-                    {
+                    if (pgVisitor instanceof PGOutputVisitor) {
                         PGOutputVisitor pgv = (PGOutputVisitor) pgVisitor;
                         pgv.print(this.rowCount.toString());
-                        if (this.offset != null)
-                        {
+                        if (this.offset != null) {
                             pgv.print(" OFFSET ");
                             pgv.print(this.offset.toString());
                         }
-                    }
-                    else
-                    {
+                    } else {
                         acceptChild(visitor, offset);
                         acceptChild(visitor, rowCount);
                     }

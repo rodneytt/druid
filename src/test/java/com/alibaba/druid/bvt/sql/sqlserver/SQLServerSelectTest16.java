@@ -27,12 +27,12 @@ public class SQLServerSelectTest16 extends TestCase {
 
     public void test_simple() throws Exception {
         String sql = "select GEN_VAL " + //
-                     "from ID_GENERATOR with (updlock, rowlock) " + //
-                     "where GEN_NAME = 'T_USERS'"; //
+                "from ID_GENERATOR with (updlock, rowlock) " + //
+                "where GEN_NAME = 'T_USERS'"; //
 
         String expect = "SELECT GEN_VAL" + //
-                        "\nFROM ID_GENERATOR WITH (updlock, rowlock)" + //
-                        "\nWHERE GEN_NAME = 'T_USERS'";
+                "\nFROM ID_GENERATOR WITH (updlock, rowlock)" + //
+                "\nWHERE GEN_NAME = 'T_USERS'";
 
         SQLServerStatementParser parser = new SQLServerStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);

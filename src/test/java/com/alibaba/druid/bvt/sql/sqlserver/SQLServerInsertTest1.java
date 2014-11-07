@@ -25,13 +25,12 @@ import com.alibaba.druid.sql.test.TestUtils;
 public class SQLServerInsertTest1 extends TestCase {
 
     public void test_isEmpty() throws Exception {
-        String sql = "INSERT INTO Cities (Location)" +
-        		"VALUES ( dbo.CreateNewPoint(x, y) );";
+        String sql = "INSERT INTO Cities (Location)" + "VALUES ( dbo.CreateNewPoint(x, y) );";
 
         String expect = "INSERT INTO Cities" + //
-                        "\n\t(Location)" + //
-                        "\nVALUES" + //
-                        "\n(dbo.CreateNewPoint(x, y))";
+                "\n\t(Location)" + //
+                "\nVALUES" + //
+                "\n(dbo.CreateNewPoint(x, y))";
 
         SQLServerStatementParser parser = new SQLServerStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);

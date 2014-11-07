@@ -28,30 +28,14 @@ import com.alibaba.druid.stat.TableStat;
 public class OracleBlockTest12 extends OracleTest {
 
     public void test_0() throws Exception {
-        String sql = "DECLARE" +
-        		"  emp_id        NUMBER(6);" +
-        		"  emp_lastname  VARCHAR2(25);" +
-        		"  emp_salary    NUMBER(8,2);" +
-        		"  emp_jobid     VARCHAR2(10);" +
-        		"BEGIN" +
-        		"  SELECT employee_id, last_name, salary, job_id" +
-        		"  INTO emp_id, emp_lastname, emp_salary, emp_jobid" +
-        		"  FROM employees" +
-        		"  WHERE employee_id = 120;" +
-        		"" +
-        		"  INSERT INTO emp_name (employee_id, last_name)" +
-        		"  VALUES (emp_id, emp_lastname); " +
-        		"  INSERT INTO emp_sal (employee_id, salary) " +
-        		"  VALUES (emp_id, emp_salary);" +
-        		"" +
-        		"  INSERT INTO emp_job (employee_id, job_id)" +
-        		"  VALUES (emp_id, emp_jobid);" +
-        		" " +
-        		"EXCEPTION" +
-        		"  WHEN DUP_VAL_ON_INDEX THEN" +
-        		"    ROLLBACK;" +
-        		"    DBMS_OUTPUT.PUT_LINE('Inserts were rolled back');" +
-        		"END;"; //
+        String sql = "DECLARE" + "  emp_id        NUMBER(6);" + "  emp_lastname  VARCHAR2(25);"
+                + "  emp_salary    NUMBER(8,2);" + "  emp_jobid     VARCHAR2(10);" + "BEGIN"
+                + "  SELECT employee_id, last_name, salary, job_id" + "  INTO emp_id, emp_lastname, emp_salary, emp_jobid"
+                + "  FROM employees" + "  WHERE employee_id = 120;" + "" + "  INSERT INTO emp_name (employee_id, last_name)"
+                + "  VALUES (emp_id, emp_lastname); " + "  INSERT INTO emp_sal (employee_id, salary) "
+                + "  VALUES (emp_id, emp_salary);" + "" + "  INSERT INTO emp_job (employee_id, job_id)"
+                + "  VALUES (emp_id, emp_jobid);" + " " + "EXCEPTION" + "  WHEN DUP_VAL_ON_INDEX THEN" + "    ROLLBACK;"
+                + "    DBMS_OUTPUT.PUT_LINE('Inserts were rolled back');" + "END;"; //
 
         OracleStatementParser parser = new OracleStatementParser(sql);
         List<SQLStatement> statementList = parser.parseStatementList();
@@ -80,6 +64,6 @@ public class OracleBlockTest12 extends OracleTest {
         Assert.assertEquals(11, visitor.getColumns().size());
         Assert.assertEquals(1, visitor.getConditions().size());
 
-//        Assert.assertTrue(visitor.getColumns().contains(new TableStat.Column("employees", "salary")));
+        // Assert.assertTrue(visitor.getColumns().contains(new TableStat.Column("employees", "salary")));
     }
 }

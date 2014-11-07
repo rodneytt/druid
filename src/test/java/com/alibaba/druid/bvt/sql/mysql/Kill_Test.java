@@ -36,18 +36,17 @@ public class Kill_Test extends TestCase {
 
         Assert.assertEquals("KILL QUERY 233;", text);
     }
-    
-    public void test_1() throws Exception {
-    	String sql = "KILL  CONNECTION 233";
-    	
-    	MySqlStatementParser parser = new MySqlStatementParser(sql);
-    	List<SQLStatement> stmtList = parser.parseStatementList();
-    	
-    	String text = output(stmtList);
-    	
-    	Assert.assertEquals("KILL CONNECTION 233;", text);
-    }
 
+    public void test_1() throws Exception {
+        String sql = "KILL  CONNECTION 233";
+
+        MySqlStatementParser parser = new MySqlStatementParser(sql);
+        List<SQLStatement> stmtList = parser.parseStatementList();
+
+        String text = output(stmtList);
+
+        Assert.assertEquals("KILL CONNECTION 233;", text);
+    }
 
     private String output(List<SQLStatement> stmtList) {
         StringBuilder out = new StringBuilder();

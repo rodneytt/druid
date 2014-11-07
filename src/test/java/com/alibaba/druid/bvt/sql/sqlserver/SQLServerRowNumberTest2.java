@@ -25,21 +25,17 @@ import com.alibaba.druid.sql.test.TestUtils;
 public class SQLServerRowNumberTest2 extends TestCase {
 
     public void test_isEmpty() throws Exception {
-        String sql = "SELECT * FROM ("
-                     + //
-                     "   SELECT ROW_NUMBER() OVER (ORDER BY FAlertDate Desc, FAlertLevel, FAlertType)  AS RowNumber, *"
-                     + //
-                     "        from monitor_business" + //
-                     "   where FRemoveAlert = ?" + //
-                     " ) AS temp_table" + //
-                     "   WHERE RowNumber BETWEEN ? AND ?";
+        String sql = "SELECT * FROM (" + //
+                "   SELECT ROW_NUMBER() OVER (ORDER BY FAlertDate Desc, FAlertLevel, FAlertType)  AS RowNumber, *" + //
+                "        from monitor_business" + //
+                "   where FRemoveAlert = ?" + //
+                " ) AS temp_table" + //
+                "   WHERE RowNumber BETWEEN ? AND ?";
 
-        String expect = "SELECT *" +
-        		"\nFROM (SELECT ROW_NUMBER() OVER (ORDER BY FAlertDate DESC, FAlertLevel, FAlertType) AS RowNumber, *" +
-        		"\n\tFROM monitor_business" +
-        		"\n\tWHERE FRemoveAlert = ?" +
-        		"\n\t) temp_table" +
-        		"\nWHERE RowNumber BETWEEN ? AND ?";
+        String expect = "SELECT *"
+                + "\nFROM (SELECT ROW_NUMBER() OVER (ORDER BY FAlertDate DESC, FAlertLevel, FAlertType) AS RowNumber, *"
+                + "\n\tFROM monitor_business" + "\n\tWHERE FRemoveAlert = ?" + "\n\t) temp_table"
+                + "\nWHERE RowNumber BETWEEN ? AND ?";
 
         SQLServerStatementParser parser = new SQLServerStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);

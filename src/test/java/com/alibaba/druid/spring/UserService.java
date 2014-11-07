@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class UserService implements IUserService {
 
-    private IUserDao         dao;
+    private IUserDao dao;
     private ISequenceService sequenceService;
 
     @Transactional(propagation = Propagation.REQUIRED)

@@ -72,7 +72,7 @@ public class PostgresqlResourceTest extends PGTest {
     }
 
     void mergValidate(String sql, String expect) {
-    	PGSQLStatementParser parser = new PGSQLStatementParser(sql);
+        PGSQLStatementParser parser = new PGSQLStatementParser(sql);
         List<SQLStatement> statementList = parser.parseStatementList();
         SQLStatement statemen = statementList.get(0);
 
@@ -86,6 +86,5 @@ public class PostgresqlResourceTest extends PGTest {
 
         Assert.assertEquals(expect, out.toString());
     }
-
 
 }

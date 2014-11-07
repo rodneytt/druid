@@ -12,9 +12,8 @@ import com.alibaba.druid.support.console.OptionParseException;
 
 public class OptionTest extends TestCase {
 
-
     public void test_parseOptions() throws Exception {
-        String[] cmdArray = {"-sql","-ds", "200"};
+        String[] cmdArray = {"-sql", "-ds", "200"};
         Option opt = Option.parseOptions(cmdArray);
         Assert.assertNotNull(opt);
         Assert.assertTrue(opt.printSqlData());
@@ -38,22 +37,21 @@ public class OptionTest extends TestCase {
         Assert.assertFalse(opt.printActiveConn());
         Assert.assertTrue(opt.isDetailPrint());
         Assert.assertEquals(opt.getPid(), 1319);
-        
-        cmdArray = new String[] {"-sql","-id","5","200"};
+
+        cmdArray = new String[] {"-sql", "-id", "5", "200"};
         opt = Option.parseOptions(cmdArray);
         Assert.assertNotNull(opt);
         Assert.assertEquals(opt.getId(), 5);
-        Assert.assertEquals(opt.getPid(), 200); 
+        Assert.assertEquals(opt.getPid(), 200);
 
-		cmdArray = new String[] {"-sql","-id","5","200", "3"};
+        cmdArray = new String[] {"-sql", "-id", "5", "200", "3"};
         opt = Option.parseOptions(cmdArray);
         Assert.assertNotNull(opt);
         Assert.assertEquals(opt.getId(), 5);
         Assert.assertEquals(opt.getPid(), 200);
         Assert.assertEquals(opt.getInterval(), 3);
 
-
-        cmdArray = new String[] {"-ds","-id","5", "-detail", "200", "3"};
+        cmdArray = new String[] {"-ds", "-id", "5", "-detail", "200", "3"};
         opt = Option.parseOptions(cmdArray);
         Assert.assertNotNull(opt);
         Assert.assertEquals(opt.getId(), 5);
@@ -61,7 +59,7 @@ public class OptionTest extends TestCase {
         Assert.assertEquals(opt.getInterval(), 3);
         Assert.assertEquals(opt.isDetailPrint(), true);
 
-        //not enough arguments
+        // not enough arguments
         cmdArray = new String[] {};
         try {
             opt = Option.parseOptions(cmdArray);
@@ -70,7 +68,7 @@ public class OptionTest extends TestCase {
             Assert.assertNotNull(e);
         }
 
-        //need pid
+        // need pid
         cmdArray = new String[] {"-ds"};
         try {
             opt = Option.parseOptions(cmdArray);
@@ -80,15 +78,14 @@ public class OptionTest extends TestCase {
         }
     }
 
-
     public void test_printHelp() throws Exception {
         Option.printHelp();
     }
 
-	public static void main(String[] args) {
-		Result result = JUnitCore.runClasses(OptionTest.class);
-		for (Failure failure : result.getFailures()) {
-			System.out.println(failure.toString());
-		}
-	}
+    public static void main(String[] args) {
+        Result result = JUnitCore.runClasses(OptionTest.class);
+        for (Failure failure : result.getFailures()) {
+            System.out.println(failure.toString());
+        }
+    }
 }

@@ -33,7 +33,7 @@ public class DMLInsertParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("INSERT HIGH_PRIORITY INTO test.t1 (t1.id1, id2)\n" + //
-                            "VALUES (?, '123')", output);
+                "VALUES (?, '123')", output);
     }
 
     public void testInsert_1() throws Exception {
@@ -43,7 +43,7 @@ public class DMLInsertParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("INSERT IGNORE INTO test.t1 (t1.id1)\nVALUES (?)" + //
-                            "\nON DUPLICATE KEY UPDATE ex.col1 = ?, col2 = 12", output);
+                "\nON DUPLICATE KEY UPDATE ex.col1 = ?, col2 = 12", output);
     }
 
     public void testInsert_2() throws Exception {
@@ -62,8 +62,8 @@ public class DMLInsertParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("INSERT LOW_PRIORITY INTO t1\nVALUES (0.12, 1, 2)," + //
-                            "\n\t(?)," + //
-                            "\n\t(DEFAULT)", output);
+                "\n\t(?)," + //
+                "\n\t(DEFAULT)", output);
     }
 
     public void testInsert_4() throws Exception {
@@ -82,8 +82,7 @@ public class DMLInsertParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("INSERT LOW_PRIORITY INTO t1\nSELECT id\nFROM t1" + //
-        		"\nON DUPLICATE KEY UPDATE ex.col1 = ?, col2 = 12",
-                            output);
+                "\nON DUPLICATE KEY UPDATE ex.col1 = ?, col2 = 12", output);
     }
 
     public void testInsert_6() throws Exception {
@@ -93,7 +92,7 @@ public class DMLInsertParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("INSERT LOW_PRIORITY INTO t1 (t1.col1)\nVALUES (123)," + //
-        		"\n\t('12''34')", output);
+                "\n\t('12''34')", output);
     }
 
     public void testInsert_8() throws Exception {
@@ -103,8 +102,7 @@ public class DMLInsertParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("INSERT LOW_PRIORITY INTO t1 (col1, t1.col2)\nSELECT id\nFROM t3" + //
-        		"\nON DUPLICATE KEY UPDATE ex.col1 = ?",
-                            output);
+                "\nON DUPLICATE KEY UPDATE ex.col1 = ?", output);
     }
 
     public void testInsert_9() throws Exception {

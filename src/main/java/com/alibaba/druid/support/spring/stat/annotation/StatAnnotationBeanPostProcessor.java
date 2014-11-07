@@ -27,14 +27,14 @@ import com.alibaba.druid.support.spring.stat.DruidStatInterceptor;
 @SuppressWarnings("serial")
 public class StatAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor implements BeanFactoryAware {
 
-	@Resource(name="druid-stat-interceptor")
-	private DruidStatInterceptor druidStatInterceptor;
-	
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		setBeforeExistingAdvisors(true);
-		StatAnnotationAdvisor advisor = new StatAnnotationAdvisor(druidStatInterceptor);
-		advisor.setBeanFactory(beanFactory);
-		this.advisor = advisor;
-	}
+    @Resource(name = "druid-stat-interceptor")
+    private DruidStatInterceptor druidStatInterceptor;
+
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        setBeforeExistingAdvisors(true);
+        StatAnnotationAdvisor advisor = new StatAnnotationAdvisor(druidStatInterceptor);
+        advisor.setBeanFactory(beanFactory);
+        this.advisor = advisor;
+    }
 
 }

@@ -35,7 +35,7 @@ import com.alibaba.druid.sql.visitor.SQLASTOutputVisitor;
 
 public class PGOutputVisitor extends SQLASTOutputVisitor implements PGASTVisitor {
 
-    public PGOutputVisitor(Appendable appender){
+    public PGOutputVisitor(Appendable appender) {
         super(appender);
     }
 
@@ -471,14 +471,14 @@ public class PGOutputVisitor extends SQLASTOutputVisitor implements PGASTVisitor
 
     }
 
-	@Override
-	public boolean visit(PGLimit x) {
-		return true;
-	}
+    @Override
+    public boolean visit(PGLimit x) {
+        return true;
+    }
 
-	@Override
-	public void endVisit(PGLimit x) {
-		
-	}
+    @Override
+    public void endVisit(PGLimit x) {
+
+    }
 
 }

@@ -26,11 +26,9 @@ import com.alibaba.druid.sql.test.TestUtils;
 public class SQLServerUpdateTest4 extends TestCase {
 
     public void test_update() throws Exception {
-        String sql = "UPDATE TOP (10) HumanResources.Employee " +
-        		"SET VacationHours = VacationHours * 1.25 ;";
+        String sql = "UPDATE TOP (10) HumanResources.Employee " + "SET VacationHours = VacationHours * 1.25 ;";
 
-        String expect = "UPDATE TOP (10) HumanResources.Employee" +
-        		"\nSET VacationHours = VacationHours * 1.25";
+        String expect = "UPDATE TOP (10) HumanResources.Employee" + "\nSET VacationHours = VacationHours * 1.25";
 
         SQLServerStatementParser parser = new SQLServerStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);

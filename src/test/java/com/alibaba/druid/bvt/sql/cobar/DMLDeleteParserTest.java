@@ -33,7 +33,7 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE LOW_PRIORITY FROM id1.id, id USING (t1) AS a" + //
-                            "\nWHERE col1 = ?", output);
+                "\nWHERE col1 = ?", output);
     }
 
     public void testDelete_1() throws Exception {
@@ -43,7 +43,7 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE FROM id1.id" + //
-                            "\nUSING t1", output);
+                "\nUSING t1", output);
     }
 
     public void testDelete_2() throws Exception {
@@ -53,9 +53,9 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE FROM offer.*, wp_image.*" + //
-                            " USING (offer) AS a, wp_image b\n" + //
-                            "WHERE a.member_id = b.member_id\n" + //
-                            "\tAND a.member_id = 'abc'", output);
+                " USING (offer) AS a, wp_image b\n" + //
+                "WHERE a.member_id = b.member_id\n" + //
+                "\tAND a.member_id = 'abc'", output);
     }
 
     public void testDelete_3() throws Exception {
@@ -65,8 +65,8 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE FROM id1.id\n" + //
-                            "WHERE col1 = 'adf'\n" + //
-                            "LIMIT 1, ?", output);
+                "WHERE col1 = 'adf'\n" + //
+                "LIMIT 1, ?", output);
     }
 
     public void testDelete_4() throws Exception {
@@ -76,9 +76,9 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE FROM id\n" + //
-                            "WHERE col1 = 'adf'\n" + //
-                            "ORDER BY d\n" + //
-                            "LIMIT 2, ?", output);
+                "WHERE col1 = 'adf'\n" + //
+                "ORDER BY d\n" + //
+                "LIMIT 2, ?", output);
     }
 
     public void testDelete_5() throws Exception {
@@ -88,9 +88,9 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE id.*\n" + //
-                            "FROM t1, t2\n" + //
-                            "WHERE col1 = 'adf'\n" + //
-                            "\tAND col2 = 1", output);
+                "FROM t1, t2\n" + //
+                "WHERE col1 = 'adf'\n" + //
+                "\tAND col2 = 1", output);
     }
 
     public void testDelete_6() throws Exception {
@@ -100,7 +100,7 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE id, id.t\n" + //
-                            "FROM t1", output);
+                "FROM t1", output);
     }
 
     public void testDelete_7() throws Exception {
@@ -110,11 +110,11 @@ public class DMLDeleteParserTest extends TestCase {
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE FROM t1\n" + //
-                            "WHERE t1.id1 = 'abc'\n" + //
-                            "ORDER BY a\n" + //
-                            "LIMIT 5", output);
+                "WHERE t1.id1 = 'abc'\n" + //
+                "ORDER BY a\n" + //
+                "LIMIT 5", output);
     }
-    
+
     public void testDelete_8() throws Exception {
         String sql = "deLetE from t1";
         MySqlStatementParser parser = new MySqlStatementParser(sql);
@@ -123,24 +123,22 @@ public class DMLDeleteParserTest extends TestCase {
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("DELETE FROM t1", output);
     }
-    
+
     public void testDelete_9() throws Exception {
         String sql = "deLetE ignore tb1.*,id1.t from t1";
         MySqlStatementParser parser = new MySqlStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
-        Assert.assertEquals("DELETE IGNORE tb1.*, id1.t\n" +
-        		"FROM t1", output);
+        Assert.assertEquals("DELETE IGNORE tb1.*, id1.t\n" + "FROM t1", output);
     }
-    
+
     public void testDelete_10() throws Exception {
         String sql = "deLetE quick tb1.*,id1.t from t1";
         MySqlStatementParser parser = new MySqlStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);
         parser.match(Token.EOF);
         String output = SQLUtils.toMySqlString(stmt);
-        Assert.assertEquals("DELETE QUICK tb1.*, id1.t\n" +
-                "FROM t1", output);
+        Assert.assertEquals("DELETE QUICK tb1.*, id1.t\n" + "FROM t1", output);
     }
 }

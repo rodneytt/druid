@@ -27,16 +27,16 @@ import com.mysql.jdbc.jdbc2.optional.SuspendableXAConnection;
 public class MySqlUtils {
 
     public static XAConnection createXAConnection(Connection physicalConn) throws SQLException {
-    	com.mysql.jdbc.ConnectionImpl mysqlConn = (com.mysql.jdbc.ConnectionImpl)physicalConn;
-    	if(mysqlConn.getPinGlobalTxToPhysicalConnection()) {
+        com.mysql.jdbc.ConnectionImpl mysqlConn = (com.mysql.jdbc.ConnectionImpl) physicalConn;
+        if (mysqlConn.getPinGlobalTxToPhysicalConnection()) {
 
-    		if (!Util.isJdbc4()) {
-    			return new SuspendableXAConnection(mysqlConn);
-    		}
+            if (!Util.isJdbc4()) {
+                return new SuspendableXAConnection(mysqlConn);
+            }
 
-    		return new com.mysql.jdbc.jdbc2.optional.JDBC4SuspendableXAConnection(mysqlConn);
-    	
-    	}
+            return new com.mysql.jdbc.jdbc2.optional.JDBC4SuspendableXAConnection(mysqlConn);
+
+        }
         return new MysqlXAConnection(mysqlConn, false);
     }
 }

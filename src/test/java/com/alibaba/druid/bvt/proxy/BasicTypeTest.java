@@ -55,9 +55,9 @@ public class BasicTypeTest extends TestCase {
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLE T_BASIC_TYPE (F1 FLOAT, F2 DOUBLE, F3 REAL, F4 DATE, F5 TIME, F6 SMALLINT, F7 SMALLINT, F8 INTEGER, F9 BIGINT, F10 DECIMAL(9,2), F11 TIMESTAMP, F12 BLOB, F13 VARCHAR(256), F14 VARCHAR(256), F15 VARCHAR(256), F16 VARCHAR(256), F17 SMALLINT)");
         stmt.execute("CREATE PROCEDURE BASIC_CALL_0(INOUT F1 FLOAT, INOUT F2 DOUBLE, INOUT F3 REAL, INOUT F4 DATE, INOUT F5 TIME, INOUT F6 SMALLINT, INOUT F7 SMALLINT, INOUT F8 INTEGER, INOUT F9 BIGINT, INOUT F10 DECIMAL(9,2), INOUT F11 TIMESTAMP, INOUT F12 VARCHAR(128) FOR BIT DATA, INOUT F13 VARCHAR(256), INOUT F14 VARCHAR(256), INOUT F15 VARCHAR(256), INOUT F16 VARCHAR(256), INOUT F17 SMALLINT) "
-                     + "LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME '"
-                     + BasicTypeTest.class.getName()
-                     + ".basic_process_0' " + "DYNAMIC RESULT SETS 1");
+                + "LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME '"
+                + BasicTypeTest.class.getName()
+                + ".basic_process_0' " + "DYNAMIC RESULT SETS 1");
         stmt.close();
         conn.close();
     }
@@ -73,7 +73,7 @@ public class BasicTypeTest extends TestCase {
 
     protected void tearDown() throws Exception {
         dropTable();
-        
+
         DruidDriver.getProxyDataSources().clear();
         Assert.assertEquals(0, JdbcStatManager.getInstance().getSqlList().size());
     }
@@ -91,7 +91,8 @@ public class BasicTypeTest extends TestCase {
             conn = DriverManager.getConnection(create_url);
             conn.rollback();
 
-            pstmt = conn.prepareStatement("INSERT INTO T_BASIC_TYPE (F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17) VALUES (?, ?, ?, ?, ?,	?, ?, ?, ?, ?,	?, ?, ?,?, ?, 	?, ?)");
+            pstmt = conn
+                    .prepareStatement("INSERT INTO T_BASIC_TYPE (F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17) VALUES (?, ?, ?, ?, ?,?, ?, ?, ?, ?,?, ?, ?,?, ?, ?, ?)");
             pstmt.getParameterMetaData();
 
             pstmt.setFloat(1, 1F);
@@ -131,7 +132,7 @@ public class BasicTypeTest extends TestCase {
             stmt.close();
 
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE,
-                                        ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                    ResultSet.CLOSE_CURSORS_AT_COMMIT);
             stmt.setQueryTimeout(stmt.getQueryTimeout());
             stmt.setEscapeProcessing(true);
             stmt.clearBatch();
@@ -142,7 +143,8 @@ public class BasicTypeTest extends TestCase {
             Savepoint point = conn.setSavepoint();
             point = conn.setSavepoint("save_point");
 
-            rs = stmt.executeQuery("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17 FROM T_BASIC_TYPE");
+            rs = stmt
+                    .executeQuery("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17 FROM T_BASIC_TYPE");
             rs.next();
             rs.getFloat(1);
             rs.getDouble(2);
@@ -196,10 +198,11 @@ public class BasicTypeTest extends TestCase {
             rs.updateRow();
 
             JdbcUtils.close(rs);
-//            conn.rollback(point);
+            // conn.rollback(point);
             conn.setAutoCommit(true);
 
-            rs = stmt.executeQuery("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17 FROM T_BASIC_TYPE");
+            rs = stmt
+                    .executeQuery("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17 FROM T_BASIC_TYPE");
             rs.next();
             rs.getFloat("F1");
             rs.getDouble("F2");
@@ -254,32 +257,37 @@ public class BasicTypeTest extends TestCase {
             Assert.assertEquals(12, rs.findColumn("F12"));
             JdbcUtils.close(rs);
 
-            pstmt = conn.prepareStatement("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE");
+            pstmt = conn
+                    .prepareStatement("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE");
             JdbcUtils.close(pstmt);
 
-            pstmt = conn.prepareStatement("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
-                                          new int[] { 1, 2 });
+            pstmt = conn.prepareStatement(
+                    "SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
+                    new int[] {1, 2});
             JdbcUtils.close(pstmt);
 
-            pstmt = conn.prepareStatement("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
-                                          new String[] { "F1", "F2" });
+            pstmt = conn.prepareStatement(
+                    "SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
+                    new String[] {"F1", "F2"});
             JdbcUtils.close(pstmt);
 
-            pstmt = conn.prepareStatement("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
-                                          Statement.RETURN_GENERATED_KEYS);
+            pstmt = conn.prepareStatement(
+                    "SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
+                    Statement.RETURN_GENERATED_KEYS);
             JdbcUtils.close(pstmt);
 
-            pstmt = conn.prepareStatement("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
-                                          ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pstmt = conn.prepareStatement(
+                    "SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
+                    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pstmt.executeQuery().close();
             JdbcUtils.close(pstmt);
 
-            pstmt = conn.prepareStatement("SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
-                                          ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE,
-                                          ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            pstmt = conn.prepareStatement(
+                    "SELECT F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16 FROM T_BASIC_TYPE",
+                    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             JdbcUtils.close(pstmt);
 
-            cstmt = conn.prepareCall("CALL BASIC_CALL_0(?, ?, ?, ?, ?,	?, ?, ?, ?, ?,	?, ?, ?,?, ?, 	?, ?)");
+            cstmt = conn.prepareCall("CALL BASIC_CALL_0(?, ?, ?, ?, ?,?, ?, ?, ?, ?,?, ?, ?,?, ?, ?, ?)");
             cstmt.registerOutParameter(1, Types.FLOAT);
             cstmt.registerOutParameter(2, Types.DOUBLE);
             cstmt.registerOutParameter(3, Types.FLOAT);
@@ -697,9 +705,8 @@ public class BasicTypeTest extends TestCase {
     }
 
     public static void basic_process_0(double[] p1, double[] p2, float[] p3, java.sql.Date[] p4, java.sql.Time[] p5,
-                                       short[] p6, short[] p7, int[] p8, long[] p9, BigDecimal[] p10,
-                                       java.sql.Timestamp[] p11, byte[][] p12, String[] p13, String[] p14,
-                                       String[] p15, String[] p16, short[] P17, ResultSet[] p18) {
+            short[] p6, short[] p7, int[] p8, long[] p9, BigDecimal[] p10, java.sql.Timestamp[] p11, byte[][] p12,
+            String[] p13, String[] p14, String[] p15, String[] p16, short[] P17, ResultSet[] p18) {
         // stmt.execute("CREATE TABLE T_BASIC_TYPE (F1 FLOAT, F2 DOUBLE, F3
         // REAL, F4 DATE,
         // F5 TIME, F6 SMALLINT, F7 SMALLINT, F8 INTEGER, F9 BIGINT, F10

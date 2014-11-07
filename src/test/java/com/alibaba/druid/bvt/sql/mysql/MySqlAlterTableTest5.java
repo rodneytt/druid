@@ -43,7 +43,7 @@ public class MySqlAlterTableTest5 extends TestCase {
 
         String output = SQLUtils.toMySqlString(stmt);
         Assert.assertEquals("ALTER TABLE table_name" + //
-        		"\n\tCHANGE COLUMN column_name column_newname char(50)", output);
+                "\n\tCHANGE COLUMN column_name column_newname char(50)", output);
 
         Assert.assertEquals(1, visitor.getTables().size());
         Assert.assertEquals(1, visitor.getColumns().size());

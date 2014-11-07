@@ -4,6 +4,6 @@ import com.alibaba.druid.support.spring.stat.annotation.Stat;
 
 public interface UserService {
 
-	@Stat
+    @Stat
     public void save();
 }

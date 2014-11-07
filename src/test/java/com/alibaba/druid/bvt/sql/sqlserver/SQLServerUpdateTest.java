@@ -27,29 +27,25 @@ public class SQLServerUpdateTest extends TestCase {
 
     public void test_isEmpty() throws Exception {
         String sql = "update reg_student_charge_item " + //
-                     "set FAmountReceived = b.amount   " + //
-                     "from reg_student_charge_item a" + //
-                     "    ,(" + //
-                     "          select a.FId,      " + //
-                     "                   case when sum(b.FChargeAmount) is null then 0 " + //
-                     "                        else sum(b.FChargeAmount)" + //
-                     "                   end as amount " + //
-                     "           from reg_student_charge_item a " + //
-                     "           left join reg_student_charge_daybook b on a.FId = b.FChargeItemId" + //
-                     "           where a.FId=?    group by a.FId" + //
-                     "     ) b " + //
-                     "where a.FId = b.FId and a.FId = ?";
+                "set FAmountReceived = b.amount   " + //
+                "from reg_student_charge_item a" + //
+                "    ,(" + //
+                "          select a.FId,      " + //
+                "                   case when sum(b.FChargeAmount) is null then 0 " + //
+                "                        else sum(b.FChargeAmount)" + //
+                "                   end as amount " + //
+                "           from reg_student_charge_item a " + //
+                "           left join reg_student_charge_daybook b on a.FId = b.FChargeItemId" + //
+                "           where a.FId=?    group by a.FId" + //
+                "     ) b " + //
+                "where a.FId = b.FId and a.FId = ?";
 
-        String expect = "UPDATE reg_student_charge_item" +
-        		"\nSET FAmountReceived = b.amount" +
-        		"\nFROM reg_student_charge_item a, (SELECT a.FId, CASE WHEN SUM(b.FChargeAmount) IS NULL THEN 0 ELSE SUM(b.FChargeAmount) END AS amount" +
-        		"\n\t\tFROM reg_student_charge_item a" +
-        		"\n\t\t\tLEFT JOIN reg_student_charge_daybook b ON a.FId = b.FChargeItemId" +
-        		"\n\t\tWHERE a.FId = ?" +
-        		"\n\t\tGROUP BY a.FId" +
-        		"\n\t\t) b" +
-        		"\nWHERE a.FId = b.FId" +
-        		"\nAND a.FId = ?";
+        String expect = "UPDATE reg_student_charge_item"
+                + "\nSET FAmountReceived = b.amount"
+                + "\nFROM reg_student_charge_item a, (SELECT a.FId, CASE WHEN SUM(b.FChargeAmount) IS NULL THEN 0 ELSE SUM(b.FChargeAmount) END AS amount"
+                + "\n\t\tFROM reg_student_charge_item a"
+                + "\n\t\t\tLEFT JOIN reg_student_charge_daybook b ON a.FId = b.FChargeItemId" + "\n\t\tWHERE a.FId = ?"
+                + "\n\t\tGROUP BY a.FId" + "\n\t\t) b" + "\nWHERE a.FId = b.FId" + "\nAND a.FId = ?";
 
         SQLServerStatementParser parser = new SQLServerStatementParser(sql);
         SQLStatement stmt = parser.parseStatementList().get(0);

@@ -157,14 +157,14 @@ public class PGASTVisitorAdapter extends SQLASTVisitorAdapter implements PGASTVi
         return true;
     }
 
-	@Override
-	public boolean visit(PGLimit x) {
-		return true;
-	}
+    @Override
+    public boolean visit(PGLimit x) {
+        return true;
+    }
 
-	@Override
-	public void endVisit(PGLimit x) {
-		
-	}
+    @Override
+    public void endVisit(PGLimit x) {
+
+    }
 
 }
