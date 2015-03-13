@@ -1,9 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <!-- <parent> <groupId>com.alibaba</groupId> <artifactId>parent-pom</artifactId> <version>1.0.0-SNAPSHOT</version> </parent> -->
+
     <groupId>com.alibaba</groupId>
     <artifactId>druid</artifactId>
-    <version>1.0.10.chsi.1</version>
+    <version>1.0.13.chsi.1</version>
+
     <packaging>jar</packaging>
     <name>druid</name>
     <description>An JDBC datasource implementation.</description>
@@ -25,30 +28,12 @@
         <repository>
             <id>local-file</id>
             <url>file://${basedir}/lib/</url>
-        </repository>
-        <repository>
-            <id>chsi</id>
-            <name>Chsi Repository</name>
             <layout>default</layout>
-            <url>http://maven.chsi.com.cn/maven2</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
     </repositories>
 
-    <distributionManagement>
-        <repository>
-            <id>Chsi Repository</id>
-            <name>Repository Name</name>
-            <url>ftp://maven.chsi.com.cn</url>
-        </repository>
-        <snapshotRepository>
-            <id>Chsi Repository</id>
-            <name>Repository Name</name>
-            <url>ftp://maven.chsi.com.cn</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <!-- <distributionManagement> <repository> <id>opensesame</id> <url>dav:http://code.alibabatech.com/mvn/releases/</url> </repository> 
+        <snapshotRepository> <id>opensesame</id> <url>dav:http://code.alibabatech.com/mvn/snapshots/</url> </snapshotRepository> </distributionManagement> -->
     <developers>
         <developer>
             <id>wenshao</id>
@@ -89,8 +74,8 @@
         <extensions>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ftp</artifactId>
-                <version>2.2</version>
+                <artifactId>wagon-webdav</artifactId>
+                <version>1.0-beta-2</version>
             </extension>
         </extensions>
         <plugins>
@@ -174,11 +159,38 @@
             </plugin>
 
             <!-- http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
-            <!-- <plugin> <inherited>false</inherited> <groupId>com.mycila.maven-license-plugin</groupId> <artifactId>maven-license-plugin</artifactId> 
-                <version>1.10.b1</version> <configuration> <header>${basedir}/doc/license.txt</header> <failIfMissing>true</failIfMissing> <aggregate>true</aggregate> 
-                <strictCheck>true</strictCheck> <properties> </properties> <mapping> <java>SLASHSTAR_STYLE</java> </mapping> <includes> <include>src/main/java/**/*.java</include> 
-                </includes> <encoding>UTF-8</encoding> </configuration> <executions> <execution> <id>check-headers</id> <phase>verify</phase> 
-                <goals> <goal>check</goal> </goals> </execution> </executions> </plugin> -->
+            <plugin>
+                <!-- Working with multi-module projects -->
+                <inherited>false</inherited>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.10.b1</version>
+                <configuration>
+                    <header>${basedir}/doc/license.txt</header>
+                    <failIfMissing>true</failIfMissing>
+                    <aggregate>true</aggregate>
+                    <strictCheck>true</strictCheck>
+                    <properties>
+                        <!-- <year>2012</year> -->
+                    </properties>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                    <includes>
+                        <include>src/main/java/**/*.java</include>
+                    </includes>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-headers</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -518,6 +530,12 @@
             <artifactId>tbdatasource</artifactId>
             <version>2.0.2</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>jboss</groupId>
+                    <artifactId>jboss-j2ee</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

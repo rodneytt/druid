@@ -69,6 +69,8 @@ import com.alibaba.druid.pool.vendor.MySqlExceptionSorter;
 import com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker;
 import com.alibaba.druid.pool.vendor.OracleExceptionSorter;
 import com.alibaba.druid.pool.vendor.OracleValidConnectionChecker;
+import com.alibaba.druid.pool.vendor.PGExceptionSorter;
+import com.alibaba.druid.pool.vendor.PGValidConnectionChecker;
 import com.alibaba.druid.pool.vendor.SybaseExceptionSorter;
 import com.alibaba.druid.proxy.DruidDriver;
 import com.alibaba.druid.proxy.jdbc.DataSourceProxyConfig;
@@ -97,7 +99,14 @@ import com.alibaba.druid.wall.WallProviderStatValue;
  * @author ljw<ljw2083@alibaba-inc.com>
  * @author wenshao<szujobs@hotmail.com>
  */
-public class DruidDataSource extends DruidAbstractDataSource implements DruidDataSourceMBean, ManagedDataSource, Referenceable, Closeable, Cloneable, ConnectionPoolDataSource, MBeanRegistration {
+public class DruidDataSource extends DruidAbstractDataSource 
+    implements DruidDataSourceMBean
+        , ManagedDataSource
+        , Referenceable
+        , Closeable
+        , Cloneable
+        , ConnectionPoolDataSource
+        , MBeanRegistration {
 
     private final static Log                 LOG                     = LogFactory.getLog(DruidDataSource.class);
 
@@ -879,12 +888,14 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
 
     private void initValidConnectionChecker() {
         String realDriverClassName = driver.getClass().getName();
-        if (realDriverClassName.equals("com.mysql.jdbc.Driver")) {
+        if (realDriverClassName.equals(JdbcConstants.MYSQL_DRIVER)) {
             this.validConnectionChecker = new MySqlValidConnectionChecker();
-        } else if (realDriverClassName.equals("oracle.jdbc.driver.OracleDriver")) {
+        } else if (realDriverClassName.equals(JdbcConstants.ORACLE_DRIVER)) {
             this.validConnectionChecker = new OracleValidConnectionChecker();
-        } else if (realDriverClassName.equals("com.microsoft.jdbc.sqlserver.SQLServerDriver")) {
+        } else if (realDriverClassName.equals(JdbcConstants.SQL_SERVER_DRIVER)) {
             this.validConnectionChecker = new MSSQLValidConnectionChecker();
+        } else if (realDriverClassName.equals(JdbcConstants.POSTGRESQL_DRIVER)) {
+            this.validConnectionChecker = new PGValidConnectionChecker();
         }
     }
 
@@ -904,6 +915,9 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
         } else if (realDriverClassName.equals("com.sybase.jdbc2.jdbc.SybDriver")) {
             this.exceptionSorter = new SybaseExceptionSorter();
 
+        } else if (realDriverClassName.equals(JdbcConstants.POSTGRESQL_DRIVER)) {
+            this.exceptionSorter = new PGExceptionSorter();
+            
         } else if (realDriverClassName.equals("com.alibaba.druid.mock.MockDriver")) {
             this.exceptionSorter = new MockExceptionSorter();
         } else if (realDriverClassName.contains("DB2")) {
@@ -1024,12 +1038,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
     public void discardConnection(Connection realConnection) {
         JdbcUtils.close(realConnection);
 
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            LOG.error("interrupt");
-            return;
-        }
+        lock.lock();
         try {
             activeCount--;
             discardCount++;
@@ -1105,6 +1114,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
             buf.append("wait millis ")//
             .append(waitNanos / (1000 * 1000))//
             .append(", active " + activeCount)//
+            .append(", maxActive " + maxActive)//
             ;
 
             List<JdbcSqlStatValue> sqlList = this.getDataSourceStat().getRuningSqlList();
@@ -1251,7 +1261,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
 
                     destroyCount.incrementAndGet();
 
-                    lock.lockInterruptibly();
+                    lock.lock();
                     try {
                         activeCount--;
                         closeCount++;
@@ -1384,8 +1394,10 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
                 public Object run() {
                     ObjectName objectName = DruidDataSourceStatManager.addDataSource(DruidDataSource.this,
                                                                                      DruidDataSource.this.name);
+
                     DruidDataSource.this.setObjectName(objectName);
                     DruidDataSource.this.mbeanRegistered = true;
+
                     return null;
                 }
             });
@@ -1984,6 +1996,12 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
 
         if (abandonedList.size() > 0) {
             for (DruidPooledConnection pooledConnection : abandonedList) {
+                synchronized (pooledConnection) {
+                    if (pooledConnection.isDisable()) {
+                        continue;
+                    }
+                }
+                
                 JdbcUtils.close(pooledConnection);
                 pooledConnection.abandond();
                 removeAbandonedCount++;

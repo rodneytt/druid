@@ -24,15 +24,16 @@ import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery {
 
-    protected int                       distionOption;
+    protected int distionOption;
     protected final List<SQLSelectItem> selectList = new ArrayList<SQLSelectItem>();
 
-    protected SQLTableSource            from;
-    protected SQLExprTableSource        into;
-    protected SQLExpr                   where;
-    protected SQLSelectGroupByClause    groupBy;
+    protected SQLTableSource from;
+    protected SQLExprTableSource into;
+    protected SQLExpr where;
+    protected SQLSelectGroupByClause groupBy;
+    protected boolean parenthesized = false;
 
-    public SQLSelectQueryBlock(){
+    public SQLSelectQueryBlock() {
 
     }
 
@@ -90,6 +91,14 @@ public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery
         this.from = from;
     }
 
+    public boolean isParenthesized() {
+        return parenthesized;
+    }
+
+    public void setParenthesized(boolean parenthesized) {
+        this.parenthesized = parenthesized;
+    }
+
     @Override
     protected void accept0(SQLASTVisitor visitor) {
         if (visitor.visit(this)) {
@@ -105,6 +114,7 @@ public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (Boolean.valueOf(parenthesized).hashCode());
         result = prime * result + distionOption;
         result = prime * result + ((from == null) ? 0 : from.hashCode());
         result = prime * result + ((groupBy == null) ? 0 : groupBy.hashCode());
@@ -116,26 +126,42 @@ public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
         SQLSelectQueryBlock other = (SQLSelectQueryBlock) obj;
-        if (distionOption != other.distionOption) return false;
+        if (parenthesized ^ other.parenthesized)
+            return false;
+        if (distionOption != other.distionOption)
+            return false;
         if (from == null) {
-            if (other.from != null) return false;
-        } else if (!from.equals(other.from)) return false;
+            if (other.from != null)
+                return false;
+        } else if (!from.equals(other.from))
+            return false;
         if (groupBy == null) {
-            if (other.groupBy != null) return false;
-        } else if (!groupBy.equals(other.groupBy)) return false;
+            if (other.groupBy != null)
+                return false;
+        } else if (!groupBy.equals(other.groupBy))
+            return false;
         if (into == null) {
-            if (other.into != null) return false;
-        } else if (!into.equals(other.into)) return false;
+            if (other.into != null)
+                return false;
+        } else if (!into.equals(other.into))
+            return false;
         if (selectList == null) {
-            if (other.selectList != null) return false;
-        } else if (!selectList.equals(other.selectList)) return false;
+            if (other.selectList != null)
+                return false;
+        } else if (!selectList.equals(other.selectList))
+            return false;
         if (where == null) {
-            if (other.where != null) return false;
-        } else if (!where.equals(other.where)) return false;
+            if (other.where != null)
+                return false;
+        } else if (!where.equals(other.where))
+            return false;
         return true;
     }
 

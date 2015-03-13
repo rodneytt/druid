@@ -51,6 +51,9 @@ public class MySqlLexer extends Lexer {
         map.put("CACHE", Token.CACHE);
         map.put("ANALYZE", Token.ANALYZE);
         map.put("OPTIMIZE", Token.OPTIMIZE);
+        map.put("ROW", Token.ROW);
+        map.put("BEGIN", Token.BEGIN);
+        map.put("END", Token.END);
 
         DEFAULT_MYSQL_KEYWORDS = new Keywords(map);
     }
@@ -452,8 +455,8 @@ public class MySqlLexer extends Lexer {
             }
 
             endOfComment = isEOF();
-            
-            if (!isHint && !isAllowComment() && (isEOF() || !isSafeComment(stringVal))) {
+
+            if (!isHint && !isAllowComment() && !isSafeComment(stringVal)) {
                 throw new NotAllowCommentException();
             }
 
@@ -503,35 +506,91 @@ public class MySqlLexer extends Lexer {
             return;
         }
     }
-    
-    private boolean isSafeComment(String comment) {
-        if (comment == null) {
-            return true;
-        }
-        comment = comment.toLowerCase();
-        if (comment.indexOf("select") != -1 //
-            || comment.indexOf("delete") != -1 //
-            || comment.indexOf("insert") != -1 //
-            || comment.indexOf("update") != -1 //
-            || comment.indexOf("into") != -1 //
-            || comment.indexOf("where") != -1 //
-            || comment.indexOf("or") != -1 //
-            || comment.indexOf("and") != -1 //
-            || comment.indexOf("union") != -1 //
-            || comment.indexOf('\'') != -1 //
-            || comment.indexOf('=') != -1 //
-            || comment.indexOf('>') != -1 //
-            || comment.indexOf('<') != -1 //
-            || comment.indexOf('&') != -1 //
-            || comment.indexOf('|') != -1 //
-            || comment.indexOf('^') != -1 //
-        ) {
-            return false;
-        }
-        return true;
-    }
-    
+
     private boolean isIdentifierChar(char c) {
         return c != '#' && CharTypes.isIdentifierChar(c);
+    }
+
+    public void scanNumber() {
+        mark = pos;
+
+        if (ch == '-') {
+            bufPos++;
+            ch = charAt(++pos);
+        }
+
+        for (;;) {
+            if (ch >= '0' && ch <= '9') {
+                bufPos++;
+            } else {
+                break;
+            }
+            ch = charAt(++pos);
+        }
+
+        boolean isDouble = false;
+
+        if (ch == '.') {
+            if (charAt(pos + 1) == '.') {
+                token = Token.LITERAL_INT;
+                return;
+            }
+            bufPos++;
+            ch = charAt(++pos);
+            isDouble = true;
+
+            for (;;) {
+                if (ch >= '0' && ch <= '9') {
+                    bufPos++;
+                } else {
+                    break;
+                }
+                ch = charAt(++pos);
+            }
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            bufPos++;
+            ch = charAt(++pos);
+
+            if (ch == '+' || ch == '-') {
+                bufPos++;
+                ch = charAt(++pos);
+            }
+
+            for (;;) {
+                if (ch >= '0' && ch <= '9') {
+                    bufPos++;
+                } else {
+                    break;
+                }
+                ch = charAt(++pos);
+            }
+
+            isDouble = true;
+        }
+
+        if (isDouble) {
+            token = Token.LITERAL_FLOAT;
+        } else {
+            if (isFirstIdentifierChar(ch) && !(ch == 'b' && bufPos == 1 && charAt(pos - 1) == '0')) {
+                bufPos++;
+                for (;;) {
+                    ch = charAt(++pos);
+
+                    if (!isIdentifierChar(ch)) {
+                        break;
+                    }
+
+                    bufPos++;
+                    continue;
+                }
+
+                stringVal = addSymbol();
+                token = Token.IDENTIFIER;
+            } else {
+                token = Token.LITERAL_INT;
+            }
+        }
     }
 }

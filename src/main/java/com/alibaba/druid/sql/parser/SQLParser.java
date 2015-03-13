@@ -119,6 +119,7 @@ public class SQLParser {
                     case ANALYZE:
                     case OPTIMIZE:
                     case GRANT:
+                    case REVOKE:
                     case FULL:
                     case TO:
                     case NEW:
@@ -192,6 +193,7 @@ public class SQLParser {
         switch (lexer.token()) {
             case KEY:
             case INTERVAL:
+            case CONSTRAINT:
                 alias = lexer.token().name();
                 lexer.nextToken();
                 return alias;

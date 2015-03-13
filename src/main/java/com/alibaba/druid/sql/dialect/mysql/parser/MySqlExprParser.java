@@ -20,6 +20,7 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLOrderingSpecification;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
@@ -39,7 +40,6 @@ import com.alibaba.druid.sql.dialect.mysql.ast.MysqlForeignKey;
 import com.alibaba.druid.sql.dialect.mysql.ast.MysqlForeignKey.Match;
 import com.alibaba.druid.sql.dialect.mysql.ast.MysqlForeignKey.On;
 import com.alibaba.druid.sql.dialect.mysql.ast.MysqlForeignKey.Option;
-import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlBinaryExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlExtractExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlIntervalExpr;
@@ -57,6 +57,7 @@ import com.alibaba.druid.sql.parser.ParserException;
 import com.alibaba.druid.sql.parser.SQLExprParser;
 import com.alibaba.druid.sql.parser.SQLSelectParser;
 import com.alibaba.druid.sql.parser.Token;
+import com.alibaba.druid.util.JdbcConstants;
 
 public class MySqlExprParser extends SQLExprParser {
 
@@ -79,7 +80,7 @@ public class MySqlExprParser extends SQLExprParser {
 
             rightExp = relationalRest(rightExp);
 
-            return new SQLBinaryOpExpr(expr, SQLBinaryOperator.RegExp, rightExp);
+            return new SQLBinaryOpExpr(expr, SQLBinaryOperator.RegExp, rightExp, JdbcConstants.MYSQL);
         }
 
         return super.relationalRest(expr);
@@ -92,7 +93,7 @@ public class MySqlExprParser extends SQLExprParser {
 
             rightExp = relationalRest(rightExp);
 
-            return new SQLBinaryOpExpr(expr, SQLBinaryOperator.Modulus, rightExp);
+            return new SQLBinaryOpExpr(expr, SQLBinaryOperator.Modulus, rightExp, JdbcConstants.MYSQL);
         }
 
         return super.multiplicativeRest(expr);
@@ -105,7 +106,7 @@ public class MySqlExprParser extends SQLExprParser {
 
             rightExp = relationalRest(rightExp);
 
-            return new SQLBinaryOpExpr(expr, SQLBinaryOperator.NotRegExp, rightExp);
+            return new SQLBinaryOpExpr(expr, SQLBinaryOperator.NotRegExp, rightExp, JdbcConstants.MYSQL);
         }
 
         return super.notRationalRest(expr);
@@ -186,7 +187,7 @@ public class MySqlExprParser extends SQLExprParser {
                 } else if (ident.equalsIgnoreCase("b")) {
                     String charValue = lexer.stringVal();
                     lexer.nextToken();
-                    expr = new MySqlBinaryExpr(charValue);
+                    expr = new SQLBinaryExpr(charValue);
 
                     return primaryRest(expr);
                 } else if (ident.startsWith("_")) {
@@ -245,7 +246,7 @@ public class MySqlExprParser extends SQLExprParser {
                 lexer.nextToken();
 
                 SQLBinaryOpExpr binaryExpr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.COLLATE,
-                                                                 new SQLIdentifierExpr(collate));
+                                                                 new SQLIdentifierExpr(collate), JdbcConstants.MYSQL);
 
                 expr = binaryExpr;
 
@@ -270,7 +271,7 @@ public class MySqlExprParser extends SQLExprParser {
                 String binaryString = lexer.stringVal();
                 if (intExpr.getNumber().intValue() == 0 && binaryString.startsWith("b")) {
                     lexer.nextToken();
-                    expr = new MySqlBinaryExpr(binaryString.substring(1));
+                    expr = new SQLBinaryExpr(binaryString.substring(1));
 
                     return primaryRest(expr);
                 }
@@ -470,7 +471,7 @@ public class MySqlExprParser extends SQLExprParser {
             lexer.nextToken();
             return userName;
         }
-        
+
         if (lexer.token() == Token.ERROR) {
             throw new ParserException("syntax error, token: " + lexer.token() + " " + lexer.stringVal() + ", pos : "
                                       + lexer.pos());
@@ -583,12 +584,12 @@ public class MySqlExprParser extends SQLExprParser {
                 lexer.nextToken();
                 SQLExpr rightExp = and();
 
-                expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.BooleanOr, rightExp);
+                expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.BooleanOr, rightExp, JdbcConstants.MYSQL);
             } else if (lexer.token() == Token.XOR) {
                 lexer.nextToken();
                 SQLExpr rightExp = and();
 
-                expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.BooleanXor, rightExp);
+                expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.BooleanXor, rightExp, JdbcConstants.MYSQL);
             } else {
                 break;
             }
@@ -596,19 +597,19 @@ public class MySqlExprParser extends SQLExprParser {
 
         return expr;
     }
-    
+
     public SQLExpr additiveRest(SQLExpr expr) {
         if (lexer.token() == Token.PLUS) {
             lexer.nextToken();
             SQLExpr rightExp = multiplicative();
 
-            expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.Add, rightExp);
+            expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.Add, rightExp, JdbcConstants.MYSQL);
             expr = additiveRest(expr);
         } else if (lexer.token() == Token.SUB) {
             lexer.nextToken();
             SQLExpr rightExp = multiplicative();
 
-            expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.Subtract, rightExp);
+            expr = new SQLBinaryOpExpr(expr, SQLBinaryOperator.Subtract, rightExp, JdbcConstants.MYSQL);
             expr = additiveRest(expr);
         }
 
@@ -845,7 +846,7 @@ public class MySqlExprParser extends SQLExprParser {
         }
         return aggregateExpr;
     }
-    
+
     public MySqlSelectGroupByExpr parseSelectGroupByItem() {
         MySqlSelectGroupByExpr item = new MySqlSelectGroupByExpr();
 

@@ -62,6 +62,7 @@ public class PGLexer extends Lexer {
         map.put("TRUE", Token.TRUE);
         map.put("FALSE", Token.FALSE);
         map.put("ARRAY", Token.ARRAY);
+        map.put("IF", Token.IF);
 
         DEFAULT_PG_KEYWORDS = new Keywords(map);
     }
@@ -157,5 +158,10 @@ public class PGLexer extends Lexer {
         } else {
             stringVal = new String(buf, 0, bufPos);
         }
+    }
+    
+    public void scanSharp() {
+        token = Token.POUND;
+        scanChar();
     }
 }

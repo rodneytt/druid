@@ -22,22 +22,27 @@ import com.alibaba.druid.sql.ast.statement.SQLAssignItem;
 import com.alibaba.druid.sql.ast.statement.SQLColumnConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLGrantStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerColumnDefinition;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerColumnDefinition.Identity;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerDeclareItem;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerOutput;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerSelect;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerTop;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.expr.SQLServerObjectReferenceExpr;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerBlockStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerCommitStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerDeclareStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerExecStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerIfStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerIfStatement.Else;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerInsertStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerRollbackStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerSetStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerSetTransactionIsolationLevelStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerUpdateStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerWaitForStatement;
 import com.alibaba.druid.sql.visitor.SQLASTOutputVisitor;
 
 public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLServerASTVisitor {
@@ -552,5 +557,135 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
     @Override
     public void endVisit(SQLServerBlockStatement x) {
 
+    }
+    
+    @Override
+    protected void printGrantOn(SQLGrantStatement x) {
+        if (x.getOn() != null) {
+            print(" ON ");
+
+            if (x.getObjectType() != null) {
+                print(x.getObjectType().name());
+                print("::");
+            }
+
+            x.getOn().accept(this);
+        }
+    }
+    
+    @Override
+    public void endVisit(SQLServerSelect x) {
+        
+    }
+
+    @Override
+    public boolean visit(SQLServerSelect x) {
+        super.visit(x);
+        if (x.isForBrowse()) {
+            println();
+            print("FOR BROWSE");
+        }
+        
+        if (x.getForXmlOptions().size() > 0) {
+            println();
+            print("FOR XML ");
+            for (int i = 0; i < x.getForXmlOptions().size(); ++i) {
+                if (i != 0) {
+                    print(", ");
+                    print(x.getForXmlOptions().get(i));
+                }
+            }
+        }
+        
+        if (x.getOffset() != null) {
+            println();
+            print("OFFSET ");
+            x.getOffset().accept(this);
+            print(" ROWS");
+            
+            if (x.getRowCount() != null) {
+                print(" FETCH NEXT ");
+                x.getRowCount().accept(this);
+                print(" ROWS ONLY");
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean visit(SQLServerCommitStatement x) {
+        print("COMMIT");
+
+        if (x.isWork()) {
+            print(" WORK");
+        } else {
+            print(" TRANSACTION");
+            if (x.getTransactionName() != null) {
+                print(" ");
+                x.getTransactionName().accept(this);
+            }
+            if (x.getDelayedDurability() != null) {
+                print(" WITH ( DELAYED_DURABILITY = ");
+                x.getDelayedDurability().accept(this);
+                print(" )");
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerCommitStatement x) {
+        
+    }
+
+    @Override
+    public boolean visit(SQLServerRollbackStatement x) {
+        print("ROLLBACK");
+
+        if (x.isWork()) {
+            print(" WORK");
+        } else {
+            print(" TRANSACTION");
+            if (x.getName() != null) {
+                print(" ");
+                x.getName().accept(this);
+            }
+        }
+        
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerRollbackStatement x) {
+        
+    }
+
+    @Override
+    public boolean visit(SQLServerWaitForStatement x) {
+        print("WAITFOR");
+
+        if (x.getDelay() != null) {
+            print(" DELAY ");
+            x.getDelay().accept(this);
+        } else if (x.getTime() != null) {
+            print(" TIME ");
+            x.getTime().accept(this);
+        } if (x.getStatement() != null) {
+            print(" DELAY ");
+            x.getStatement().accept(this);
+        }
+        
+        if(x.getTimeout() != null) {
+            print(" ,TIMEOUT ");
+            x.getTimeout().accept(this);
+        }
+        
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerWaitForStatement x) {
+        
     }
 }

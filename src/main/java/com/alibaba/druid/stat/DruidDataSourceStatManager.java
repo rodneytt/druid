@@ -131,9 +131,9 @@ public class DruidDataSourceStatManager implements DruidDataSourceStatManagerMBe
 
         synchronized (instances) {
             MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+
             if (instances.size() == 0) {
                 try {
-
                     ObjectName objectName = new ObjectName(MBEAN_NAME);
                     if (!mbeanServer.isRegistered(objectName)) {
                         mbeanServer.registerMBean(instance, objectName);
@@ -141,7 +141,7 @@ public class DruidDataSourceStatManager implements DruidDataSourceStatManagerMBe
                 } catch (JMException ex) {
                     LOG.error("register mbean error", ex);
                 }
-                
+
                 DruidStatService.registerMBean();
             }
 
